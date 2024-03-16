@@ -1,0 +1,31 @@
+<!-- templates/index.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Variables</h2>
+<ul>
+    {% for variable in variables %}
+    <li>
+        {{ variable.nombre }}: {{ variable.descripcion }} Rango Óptimo: {{ variable.rango_optimo }}
+        <!-- Enlace para editar variable -->
+        <a href="{{ url_for('main.editar_variable', variable_id=variable.id) }}">Editar</a>
+        <!-- Enlace para eliminar variable -->
+        <a href="{{ url_for('main.eliminar_variable', variable_id=variable.id) }}">Eliminar</a>
+    </li>
+    {% endfor %}
+</ul>
+
+<!-- Listando Grupos -->
+<h2>Grupos</h2>
+<ul>
+    {% for grupo in grupos %}
+    <li>
+        {{ grupo.nombre }}
+        <!-- Enlace para editar grupo -->
+        <a href="{{ url_for('main.editar_grupo', grupo_id=grupo.id) }}">Editar</a>
+        <!-- Enlace para eliminar grupo -->
+        <a href="{{ url_for('main.eliminar_grupo', grupo_id=grupo.id) }}">Eliminar</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

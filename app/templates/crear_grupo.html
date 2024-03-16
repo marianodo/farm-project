@@ -1,0 +1,14 @@
+<!-- templates/crear_grupo.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Crear Nuevo Grupo</h2>
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.nombre.label }}<br>
+        {{ form.nombre(size=20) }}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}
