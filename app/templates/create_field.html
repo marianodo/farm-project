@@ -1,0 +1,8 @@
+{% extends 'index.html' %} {% block content %}
+<h2>Crear Nuevo Campo</h2>
+<form id="fieldForm" action="/field" method="POST" class="text-dark fw-bold">
+  <label for="fieldName">Nombre del Campo:</label>
+  <input type="text" id="fieldName" name="fieldName" required />
+  <button class="btn btn-outline-dark btn-sm" type="submit">Crear Campo</button>
+</form>
+{% endblock %}

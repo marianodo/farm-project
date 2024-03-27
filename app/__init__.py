@@ -1,20 +1,19 @@
 from flask import Flask
-
-from config import Config
 from app.extensions import db
+from app.config import config
+from app.blueprints import register_blueprints
+from app.models import *
 
-def create_app(config_class=Config):
-    app = Flask(__name__)
-    app.config.from_object(config_class)
+app = Flask(__name__)
+configuration = config['development']
 
-    # Initialize Flask extensions here
+# Configuración de la aplicación
+app.config.from_object(configuration)
+
+
+with app.app_context():
     db.init_app(app)
-    # Register blueprints here
-    from app.main import bp as main_bp
-    app.register_blueprint(main_bp)
+    db.drop_all()
+    db.create_all()
+    register_blueprints(app)
 
-    @app.route('/test/')
-    def test_page():
-        return '<h1>Testing the Flask Application Factory Pattern</h1>'
-
-    return app

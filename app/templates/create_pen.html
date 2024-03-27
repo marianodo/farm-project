@@ -1,0 +1,23 @@
+{% extends 'index.html' %} {% block content %}
+<form id="penForm" action="/pen" method="POST">
+  <label for="fieldId">Campo:</label>
+  <select id="fieldId" name="field_id" required>
+    <option value="" disabled selected>Seleccione el campo</option>
+    {% for field in fields %}
+    <option value="{{field.id}}">{{field.name}}</option>
+    {% endfor %}
+  </select>
+  <label for="penName">Nombre del Corral:</label>
+  <input type="text" id="penName" name="penName" required />
+  <!-- Select para seleccionar las variables -->
+  <label for="variableSelect">Variables:</label>
+  <select id="variableSelect" name="variableSelect" multiple required>
+    {% for variable in variables %}
+    <option value="{{variable.id}}">{{variable.name}}</option>
+    {% endfor %}
+  </select>
+  <!-- Inputs adicionales para los parámetros personalizados -->
+  <div id="customParametersInputs"></div>
+  <button type="submit">Crear Corral</button>
+</form>
+{% endblock %}
