@@ -48,8 +48,3 @@ class Measurement(db.Model, SerializerMixin):
     cow_id = db.Column(db.Integer, db.ForeignKey('cow.id'), nullable=False)
     variable_id = db.Column(db.Integer, db.ForeignKey('variable.id'), nullable=False)
     value = db.Column(db.JSON, nullable=False)  # Valor del atributo como JSON
-
-class Task(db.Model, SerializerMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String)
-    done = db.Column(db.Boolean)

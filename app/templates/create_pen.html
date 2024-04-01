@@ -10,14 +10,91 @@
   <label for="penName">Nombre del Corral:</label>
   <input type="text" id="penName" name="penName" required />
   <!-- Select para seleccionar las variables -->
+  {% if variables|length %}
   <label for="variableSelect">Variables:</label>
-  <select id="variableSelect" name="variableSelect" multiple required>
+  <select
+    id="variableSelect"
+    name="variableSelect"
+    onchange="handleChange()"
+    multiple
+    required
+  >
     {% for variable in variables %}
-    <option value="{{variable.id}}">{{variable.name}}</option>
+    <option value="{{variable.id}}" data-variable-id="{{variable.id}}">
+      {{variable.name}}
+    </option>
     {% endfor %}
   </select>
+  {% endif %}
+
   <!-- Inputs adicionales para los parámetros personalizados -->
-  <div id="customParametersInputs"></div>
+  <div id="customParametersInputs">
+    <div id="parametersInput"></div>
+  </div>
   <button type="submit">Crear Corral</button>
 </form>
+
+<script>
+  const handleChange = () => {
+    document
+      .getElementById('variableSelect')
+      .addEventListener('change', function () {
+        var selectedVariables = Array.from(this.selectedOptions).map(
+          (option) => option.value
+        );
+        var customParametersInputs = document.getElementById(
+          'customParametersInputs'
+        );
+        customParametersInputs.innerHTML = ''; // Limpiar cualquier entrada anterior
+
+        // Por cada variable seleccionada, agregar input adicional para modificar valores por defecto
+        selectedVariables.forEach(function (variableId) {
+          var variableName = document.querySelector(
+            'option[data-variable-id="' + variableId + '"]'
+          ).textContent;
+          var inputHTML = `
+          <div>
+            <label for="modify-${variableId}">${variableName}: Modificar valores por defecto</label>
+            <select id="modify-${variableId}" onchange="showParametersInput('${variableId}')" name="modify-${variableId}">
+              <option value="false">No</option>
+              <option value="true">Sí</option>
+            </select>
+            <div id="parametersInput-${variableId}"></div>
+          </div>
+        `;
+          customParametersInputs.innerHTML += inputHTML;
+        });
+      });
+  };
+
+  function showParametersInput(variableId) {
+    var modifyOption = document.getElementById('modify-' + variableId);
+    var parametersInput = document.getElementById(
+      'parametersInput-' + variableId
+    );
+    parametersInput.innerHTML = ''; // Limpiar cualquier entrada anterior
+
+    if (modifyOption && modifyOption.value === 'true') {
+      // Mostrar inputs adicionales para modificar valores por defecto
+      var variableType = 'number'; // Obtener el tipo de variable según tu lógica
+      if (variableType === 'number') {
+        parametersInput.innerHTML += `
+          <label for="min-${variableId}">Valor Mínimo:</label>
+          <input type="number" id="min-${variableId}" name="min-${variableId}" min="0" pattern="^[0-9]"+ required />
+          <!-- Agrega más inputs según sea necesario -->
+        `;
+      } else if (variableType === 'enum') {
+        parametersInput.innerHTML += `
+          <label for="enumValues-${variableId}">Valores Enum:</label>
+          <div id="enumInputs-${variableId}">
+            <input type="text" id="enumValue-${variableId}" class="enumValue" name="enumValues-${variableId}[]" required />
+          </div>
+          <button type="button" id="buttonAdd-${variableId}" onclick="handleClick()" disabled>Agregar input</button>
+        `;
+      } else if (variableType === 'boolean') {
+        // Agregar lógica para booleano si es necesario
+      }
+    }
+  }
+</script>
 {% endblock %}

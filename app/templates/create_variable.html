@@ -4,6 +4,7 @@
   class="text-dark fw-bold"
   action="/variable"
   method="POST"
+  onsubmit="handleSubmit(event,'{{message}}')"
 >
   <label for="variableName">Nombre de la Variable:</label>
   <input type="text" id="variableName" name="variableName" required />
@@ -25,6 +26,95 @@
 </form>
 
 <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    let form = document.getElementById('variableForm');
+    form.reset();
+  });
+  function handleSubmit(event, message) {
+    event.preventDefault(event);
+    let form = document.getElementById('variableForm');
+    let addButton = document.getElementById('buttonAdd');
+    let formData = new FormData(document.getElementById('variableForm'));
+    var enumInputs = document.querySelectorAll('.enumValue');
+    var deleteButton = document.querySelectorAll('#deleteValue');
+    // Itera sobre todos los inputs con la clase '.enumValue' excepto el primero
+    fetch('/variable', {
+      method: 'POST',
+      body: formData,
+    })
+      .then((response) => response.json()) // Parsea la respuesta JSON
+      .then((data) => {
+        if (data.message) {
+          alert(data.message);
+        }
+        if (data.error) {
+          alert(data.error);
+        }
+      })
+      .catch((error) => {
+        alert(error);
+      });
+    form.reset();
+    addButton.setAttribute('disabled', '');
+    for (var i = 1; i < enumInputs.length; i++) {
+      enumInputs[i].parentNode.removeChild(enumInputs[i]); // Elimina el input del DOM
+      deleteButton[i - 1].parentNode.removeChild(deleteButton[i - 1]);
+    }
+  }
+
+  function initializeEnumInputs() {
+    var addButton = document.getElementById('buttonAdd');
+    var enumInputs = document.querySelectorAll('.enumValue');
+    if (
+      enumInputs.length === 1 &&
+      enumInputs[0].value !== '' &&
+      enumInputs[0].value >= 5
+    )
+      addButton.removeAttribute('disabled');
+    enumInputs.forEach(function (input) {
+      input.addEventListener('input', function () {
+        var allInputsValid = Array.from(enumInputs).every(function (input) {
+          var value = input.value.trim();
+          return value !== '' && value.length >= 5;
+        });
+
+        if (allInputsValid) {
+          addButton.removeAttribute('disabled');
+        } else {
+          addButton.setAttribute('disabled', '');
+        }
+      });
+    });
+  }
+
+  function handleClick() {
+    var divEnumInputs = document.querySelectorAll('.enumValue');
+    console.log(divEnumInputs.length);
+    if (divEnumInputs.length <= 4) {
+      var newInputContainer = document.createElement('div'); // Contenedor para el nuevo input y el botón de eliminación
+      var newInput = document.createElement('input'); // Nuevo input
+      var deleteButton = document.createElement('button'); // Botón de eliminación
+      var addButton = document.getElementById('buttonAdd');
+      newInput.type = 'text';
+      newInput.classList.add('enumValue');
+      newInput.id = 'enumValue';
+      newInput.name = 'enumValues[]';
+      newInput.required = true;
+      newInput.oninput = () => initializeEnumInputs();
+      deleteButton.id = 'deleteValue';
+      deleteButton.textContent = '❌'; // Texto del botón de eliminación
+      deleteButton.type = 'button'; // Tipo de botón
+      deleteButton.addEventListener('click', function () {
+        // Asignar listener de eventos al botón de eliminación
+        newInputContainer.remove(); // Eliminar el contenedor que contiene el input y el botón de eliminación
+        initializeEnumInputs();
+      });
+      newInputContainer.appendChild(newInput); // Agregar el nuevo input al contenedor
+      newInputContainer.appendChild(deleteButton);
+      enumInputs.appendChild(newInputContainer);
+      addButton.setAttribute('disabled', '');
+    }
+  }
   function showParametersInput() {
     var variableType = document.getElementById('variableType').value;
     var parametersInput = document.getElementById('parametersInput');
@@ -33,19 +123,20 @@
     if (variableType === 'number') {
       parametersInput.innerHTML =
         '<label for="min">Valor Mínimo:</label>' +
-        '<input type="number" id="min" name="min" required />' +
+        '<input type="number" id="min" name="min" min="0" pattern="^[0-9]"+ required />' +
         '<label for="max">Valor Máximo:</label>' +
-        '<input type="number" id="max" name="max" required />' +
+        '<input type="number" id="max" name="max" min="0" pattern="^[0-9]"+ required />' +
         '<label for="optimoMin">Valor Óptimo Mínimo:</label>' +
-        '<input type="number" id="optimoMin" name="optimoMin" required />' +
+        '<input type="number" id="optimoMin" name="optimoMin" min="0" pattern="^[0-9]"+ required />' +
         '<label for="optimoMax">Valor Óptimo Máximo:</label>' +
-        '<input type="number" id="optimoMax" name="optimoMax" required />';
+        '<input type="number" id="optimoMax" name="optimoMax" min="0" pattern="^[0-9]"+ required />' +
+        '<label for="granularity">Granularity:</label>' +
+        '<input type="number" id="granularity" step="any" name="granularity" min="0" pattern="^(0|[1-9]\d*)(\.\d+)?$"+ required />';
     } else if (variableType === 'enum') {
       parametersInput.innerHTML =
         '<label for="enumValues">Valores Enum:</label>' +
-        '<input type="text" id="enumValues" name="enumValues" required />';
-    } else {
-      // No se necesita ningún campo adicional para los otros tipos de variable
+        '<div id=enumInputs><input type="text" id="enumValue" class="enumValue" name="enumValues[]" oninput="initializeEnumInputs()" required /></div>' +
+        '<button type="button" id="buttonAdd" onclick="handleClick()" disabled>Agregar input</button>';
     }
   }
 </script>
