@@ -132,7 +132,10 @@ const CreateVariable = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://127.0.0.1:5000/variable', data);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/variable`,
+        data
+      );
       if (response.status === 201) {
         e.target.reset();
         setData([]);

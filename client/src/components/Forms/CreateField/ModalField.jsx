@@ -24,7 +24,7 @@ const ModalField = ({ addField, messageToast }) => {
   const postField = () => {
     if (inputField) {
       axios
-        .post('http://127.0.0.1:5000/field', {
+        .post(`${import.meta.env.VITE_API_BASE_URL}/field`, {
           fieldName: inputField,
         })
         .then((response) => {

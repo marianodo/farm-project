@@ -17,12 +17,14 @@ const CreateField = ({ messageToast }) => {
   };
   useEffect(() => {
     if (!fields.length) {
-      axios.get('http://127.0.0.1:5000/field').then((response) => {
-        setFields(response.data ? response.data : []);
-      });
+      axios
+        .get(`${import.meta.env.VITE_API_BASE_URL}/field`)
+        .then((response) => {
+          setFields(response.data ? response.data : []);
+        });
     }
   }, [fields.length]);
-
+  console.log('env:', import.meta.env);
   return (
     <div>
       <Box

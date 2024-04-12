@@ -59,7 +59,7 @@ const NewAtributte = ({ addAttribute }) => {
       };
     }
     axios
-      .post('http://127.0.0.1:5000/variable', body)
+      .post(`${import.meta.env.VITE_API_BASE_URL}/variable`, body)
       .then((response) => {
         console.log(response.data);
         addAttribute(response.data);

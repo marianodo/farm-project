@@ -19,7 +19,7 @@ const CreateMeasurement = () => {
   //nombre de la vaca o id(opcional)
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:5000/penVariable/${params.id}`)
+      .get(`${import.meta.env.VITE_API_BASE_URL}/penVariable/${params.id}`)
       .then((response) => {
         console.log(response.data);
         setAttributes([

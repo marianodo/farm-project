@@ -9,7 +9,9 @@ const CreatePen = () => {
   useEffect(() => {
     const asyncFetchData = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/pen');
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/pen`
+        );
         setInfo(response.data);
         // if (response.data.message) alert(response.data.message);
       } catch (error) {

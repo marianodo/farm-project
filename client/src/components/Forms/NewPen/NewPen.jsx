@@ -27,7 +27,7 @@ const NewPen = ({ messageToast }) => {
       })),
     };
     axios
-      .post('http://127.0.0.1:5000/pen', body)
+      .post(`${import.meta.env.VITE_API_BASE_URL}/pen`, body)
       .then((response) => {
         messageToast(response.data.message, 'success');
         setRedirect(true);
@@ -68,7 +68,7 @@ const NewPen = ({ messageToast }) => {
 
   useEffect(() => {
     axios
-      .get('http://127.0.0.1:5000/variable')
+      .get(`${import.meta.env.VITE_API_BASE_URL}/variable`)
       .then((response) => {
         setAttributes(response.data);
       })
