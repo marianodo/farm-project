@@ -13,7 +13,7 @@ class Field(db.Model, SerializerMixin):
 # Vaca
 class Cow(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False, unique=True, sqlite_on_conflict_unique='FAIL')
+    name = db.Column(db.String(50), nullable=True, unique=True, sqlite_on_conflict_unique='FAIL')
     pen_id = db.Column(db.Integer, db.ForeignKey('pen.id'), nullable=False)
     measurement = db.relationship('Measurement', backref='cow', lazy=True) 
 
@@ -23,7 +23,7 @@ class Pen(db.Model, SerializerMixin):
     name = db.Column(db.String(50), nullable=False, unique=True, sqlite_on_conflict_unique='FAIL')
     field_id = db.Column(db.Integer, db.ForeignKey('field.id'), nullable=True)
     cows = db.relationship('Cow', backref='pen', lazy=True)
-    serialize_rules = ("-cows.pen",)
+    serialize_rules = ("-cows.pen","-pen_variable.pen",)
 
 # Variable
 class Variable(db.Model, SerializerMixin):
@@ -35,16 +35,16 @@ class Variable(db.Model, SerializerMixin):
 # Tabla intermedia corral y variable
 class PenVariable(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
-    pen_id = db.Column(db.Integer, db.ForeignKey('pen.id'), nullable=False) #corral id
-    variable_id = db.Column(db.Integer, db.ForeignKey('variable.id'), nullable=False) #variable id
-    custom_parameters = db.Column(db.JSON, nullable=True)  # Parámetros personalizados como JSON
+    pen_id = db.Column(db.Integer, db.ForeignKey('pen.id'), nullable=False)
+    variable_id = db.Column(db.Integer, db.ForeignKey('variable.id'), nullable=False)
+    custom_parameters = db.Column(db.JSON, nullable=True)
     pen = db.relationship('Pen', backref='pen_variable')
     variable = db.relationship('Variable', backref='pen_variable')
-    serialize_rules = ("-pen.pen_variable", "-variable.pen_variable",)
+    serialize_rules = ('-pen.pen_variable', '-variable.pen_variable')
 
 # Medición
 class Measurement(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     cow_id = db.Column(db.Integer, db.ForeignKey('cow.id'), nullable=False)
-    variable_id = db.Column(db.Integer, db.ForeignKey('variable.id'), nullable=False)
+    variable_id = db.Column(db.Integer, db.ForeignKey('variable.id'), nullable=False) #deberia ser el id de penVariable por el custom_parametres
     value = db.Column(db.JSON, nullable=False)  # Valor del atributo como JSON

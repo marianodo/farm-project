@@ -1,0 +1,26 @@
+.navbar {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background-color: rgba(26, 26, 26, 1) !important;
+  /* position: relative; */
+  padding: 1.5rem 1rem;
+}
+
+.contenido-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.items-2 {
+  background-color: white;
+  /* width: 0%; */
+  /* display: flex; */
+}
+
+.navbar-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
