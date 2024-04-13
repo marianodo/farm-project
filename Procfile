@@ -1,0 +1,1 @@
+web: gunicorn 'farm-app.wsgi'
