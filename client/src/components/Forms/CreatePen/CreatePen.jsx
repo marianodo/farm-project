@@ -29,7 +29,6 @@ const CreatePen = () => {
   };
 
   const handleVariableSelect = (e) => {
-    console.log('VERGA', e.target.name);
     const selectedOptions = Array.from(
       e.target.selectedOptions,
       (option) => option.value
@@ -53,7 +52,6 @@ const CreatePen = () => {
       ));
     }
   };
-  console.log('INFO: ', info);
   const renderCustomParameters = () => {
     return selectedVariables.map((variableId) => {
       const variable = info.variables.find(

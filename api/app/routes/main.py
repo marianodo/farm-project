@@ -51,17 +51,20 @@ def manage_cows():
         pen_id = data.get('pen_id') 
         try:
          if not name:
-            return jsonify({'error': 'El nombre de la vaca es requerido'}), 400
-         new_cow = Cow(name=name, pen_id=pen_id )
-         db.session.add(new_cow)
-         db.session.commit()
+            new_cow = Cow(pen_id=pen_id )
+            db.session.add(new_cow)
+            db.session.commit()
+         else:
+            new_cow = Cow(name=name, pen_id=pen_id)
+            db.session.add(new_cow)
+            db.session.commit()
          return jsonify({'message': 'Nueva vaca creada'}), 201
         except Exception as e:
             error_message = str(e)
             return jsonify({'error': error_message}), 500
     if request.method == 'GET':
         cows = Cow.query.all()
-        serialized_cows = [cow.to_dict() for cow in cows]
+        serialized_cows = [cow.to_dict(only=('id', 'name', 'pen.id')) for cow in cows]
         return jsonify(serialized_cows), 200
     
 # PEN ROUTES
@@ -140,6 +143,33 @@ def get_penVariables_by_pen_id(pen_id):
         return jsonify({'message': f'No se encontraron relaciones PenVariable para el pen_id {pen_id}'}), 404
     serialized_penVariables = [pen_variable.to_dict(only=('id', 'custom_parameters', 'variable.type', 'variable.name','variable.id')) for pen_variable in penVariables]
     return jsonify(serialized_penVariables)
+
+@main_bp.route('/measurement', methods=['GET', 'POST'])
+def manage_measurement():
+    if request.method == 'POST':
+        if request.content_type == 'application/json':
+            data = request.json
+            cow_name = data.get('cow_name')
+            pen_id = data.get('pen_id')
+            pen_variable_id = data.get('pen_variable_id')
+            value = data.get('value')
+        try:
+            new_cow = Cow(name=cow_name, pen_id=pen_id)
+            # new_cow = Cow(pen_id=pen_id)
+            db.session.add(new_cow)
+            db.session.commit()
+            new_measurement = Measurement(cow_id=new_cow.id, pen_variable_id=pen_variable_id, value=value)
+            db.session.add(new_measurement)
+            db.session.commit()
+            return jsonify({'message': 'Medición creada correctamente'}), 201
+        except Exception as e:
+            return jsonify({'error': f'Error al crear la medición: {e}'}), 500
+    if request.method == 'GET':
+        measurements = Measurement.query.all()
+        # return jsonify({'message': f'No se encontraron relaciones PenVariable para el pen_id {pen_id}'}), 404
+        serialized_measurement =[measurement.to_dict() for measurement in measurements]
+        return jsonify(serialized_measurement)
+
         
 @main_bp.route('/variable', methods=['GET', 'POST'])    
 def manage_variable():
