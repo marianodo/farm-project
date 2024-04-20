@@ -97,11 +97,10 @@ const CreateVariable = () => {
 
   const handleInputChange = (e, id, value) => {
     // Almacenar prevInputs antes de actualizar el estado
-    console.log('ESTO ES VALUE', value);
+
     const updatedInputs = additionalInputs.map((input) =>
       input.id === id ? { ...input, value } : input
     );
-    console.log('UPDATE: ', updatedInputs);
     setAdditionalInputs(updatedInputs);
 
     setData((prevData) => {
@@ -146,7 +145,6 @@ const CreateVariable = () => {
       alert(error.response.data.error);
     }
   };
-  console.log('DATA:', data);
   return (
     <div>
       <form

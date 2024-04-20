@@ -61,7 +61,6 @@ const NewAtributte = ({ addAttribute }) => {
     axios
       .post(`${import.meta.env.VITE_API_BASE_URL}/variable`, body)
       .then((response) => {
-        console.log(response.data);
         addAttribute(response.data);
         onClose();
       })

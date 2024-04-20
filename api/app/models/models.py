@@ -13,9 +13,10 @@ class Field(db.Model, SerializerMixin):
 # Vaca
 class Cow(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=True, unique=True, sqlite_on_conflict_unique='FAIL')
+    name = db.Column(db.String(50), nullable=True, unique=False, sqlite_on_conflict_unique='FAIL')
     pen_id = db.Column(db.Integer, db.ForeignKey('pen.id'), nullable=False)
-    measurement = db.relationship('Measurement', backref='cow', lazy=True) 
+    measurement = db.relationship('Measurement', backref='cow', lazy=True)
+    serialize_rules = ("-measurement.cow",)
 
 # Corral
 class Pen(db.Model, SerializerMixin):
@@ -45,6 +46,8 @@ class PenVariable(db.Model, SerializerMixin):
 # Medición
 class Measurement(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
+    # agregar date
     cow_id = db.Column(db.Integer, db.ForeignKey('cow.id'), nullable=False)
-    variable_id = db.Column(db.Integer, db.ForeignKey('variable.id'), nullable=False) #deberia ser el id de penVariable por el custom_parametres
-    value = db.Column(db.JSON, nullable=False)  # Valor del atributo como JSON
+    pen_variable_id = db.Column(db.Integer, db.ForeignKey('pen_variable.id'), nullable=False) #deberia ser el id de penVariable por el custom_parametres
+    value = db.Column(db.String(60), nullable=False)  # Valor del atributo como JSON
+    serialize_rules = ('-pen_variable_id.measurement', '-cow.measurement', '-pen.measurement',)
