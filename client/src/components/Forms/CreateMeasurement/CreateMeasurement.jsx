@@ -193,7 +193,6 @@ const CreateMeasurement = () => {
         <Box key={i} mb={4}>
           {prop.variable.type == 'number' && (
             <FormControl isInvalid={!!errors[prop.id]}>
-              {console.log(prop.custom_parameters.granularity)}
               <FormLabel>{prop.variable.name}:</FormLabel>
               <Flex>
                 <NumberInput
@@ -206,8 +205,6 @@ const CreateMeasurement = () => {
                   value={data.measurements[prop.id]}
                   onChange={(value) =>
                     handleChange(
-                      // parseFloat(value)
-                      //   ? parseFloat(value)
                       prop.id,
                       value,
                       prop.custom_parameters,
@@ -241,7 +238,7 @@ const CreateMeasurement = () => {
                     )
                   }
                   step={parseFloat(prop.custom_parameters.granularity)}
-                  min={prop.custom_parameters.value.min}
+                  min={parseFloat(prop.custom_parameters.value.min)}
                   max={prop.custom_parameters.value.max}
                 >
                   <SliderTrack>
