@@ -60,6 +60,7 @@ const ModalField = ({ addField, messageToast }) => {
                 onChange={(e) => {
                   setInputField(e.target.value);
                 }}
+                onKeyDown={(e) => (e.key === 'Enter' ? postField() : null)}
                 value={inputField}
                 autoFocus={true}
                 focusBorderColor="#1a1a1a"

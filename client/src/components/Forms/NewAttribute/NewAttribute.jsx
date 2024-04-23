@@ -34,7 +34,7 @@ const NewAtributte = ({ addAttribute }) => {
         min: 1,
         max: 1000,
         optimo_min: 100,
-        optimo_max: 200,
+        optimo_max: 500,
       },
     },
   });
@@ -46,7 +46,7 @@ const NewAtributte = ({ addAttribute }) => {
     min: 1,
     max: 1000,
     optimo_min: 100,
-    optimo_max: 200,
+    optimo_max: 500,
   });
 
   const postAttribute = () => {

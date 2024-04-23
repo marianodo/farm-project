@@ -13,7 +13,7 @@ const NewPen = ({ messageToast }) => {
 
   const [redirect, setRedirect] = useState(false);
   const [data, setData] = useState({
-    field_id: params.id,
+    field_id: parseInt(params.id),
     name: '',
     variables: [],
   });

@@ -28,8 +28,9 @@ const CreateMeasurement = () => {
   const params = useParams();
   const [attributes, setAttributes] = useState([]);
   const [errors, setErrors] = useState({});
+  const [cowName, setCowName] = useState('');
   const [data, setData] = useState({
-    cowName: '',
+    cow_name: '',
     pen_id: '',
     measurements: {},
   });
@@ -47,9 +48,26 @@ const CreateMeasurement = () => {
     if (type === 'number') validationNumber(pen_variable_id, value, parameters);
     if (type === 'bolean')
       validationBoolean(pen_variable_id, value, parameters);
-    console.log(type);
   };
-  console.log('LA DATA: ', data);
+
+  const handleChangeCow = (e) => {
+    if (e.target.value.trim() === '') {
+      setErrors({
+        ...errors,
+        cow_name: { message: 'El nombre de la vaca no puede estar vacio' },
+      });
+    } else {
+      if (errors['cow_name']) {
+        let newErrors = { ...errors };
+        delete newErrors['cow_name'];
+        setErrors(newErrors);
+      }
+    }
+    setData({
+      ...data,
+      cow_name: e.target.value,
+    });
+  };
   /* 
  necesito enviar un objeto parecido a este:
 
@@ -75,7 +93,6 @@ const CreateMeasurement = () => {
 ]
  
  */
-
   const validationNumber = (pen_variable_id, value, parameters) => {
     if (
       Number(value) % parameters.granularity !== 0 ||
@@ -154,11 +171,10 @@ const CreateMeasurement = () => {
   }, [params.id]);
   const onSubmit = () => {
     let errorsEmpty = validErrors();
-    console.log(errorsEmpty);
     if (Object.keys(errorsEmpty).length > 0) {
       setErrors(errorsEmpty);
     } else {
-      console.log(data);
+      axios.post('http://127.0.0.1:5000/measurement', data);
     }
   };
   function validErrors() {
@@ -177,17 +193,21 @@ const CreateMeasurement = () => {
   return (
     <div>
       <h1>measurement</h1>
-      <FormControl mb={2}>
-        <FormLabel>Nombre de medicion:</FormLabel>
+      <FormControl mb={2} isInvalid={!!errors['cow_name']}>
+        <FormLabel>Nombre de la vaca o ID:</FormLabel>
         <Input
-          type="enum"
+          onChange={(e) => handleChangeCow(e)}
+          type="text"
           id="name"
-          name="name"
+          name="cow_name"
           autoFocus={true}
           required
           focusBorderColor="#1a1a1a"
           placeholder="Toro Dorado"
         />
+        <FormErrorMessage fontWeight={'bold'} textShadow={'0.4px 0.4px black'}>
+          {errors['cow_name']?.message.toUpperCase()}
+        </FormErrorMessage>
       </FormControl>
       {attributes.map((prop, i) => (
         <Box key={i} mb={4}>
@@ -196,7 +216,6 @@ const CreateMeasurement = () => {
               <FormLabel>{prop.variable.name}:</FormLabel>
               <Flex>
                 <NumberInput
-                  as={'number'}
                   type="number"
                   maxW="100px"
                   mr="2rem"
@@ -327,7 +346,17 @@ const CreateMeasurement = () => {
           )}
         </Box>
       ))}
-      <button onClick={onSubmit} className="btn btn-primary btn-sm">
+      {console.log(Object.values(validErrors()))}
+      <button
+        onClick={onSubmit}
+        disabled={
+          Object.keys(errors).length === 0 &&
+          Object.values(validErrors()).length === 0
+            ? false
+            : true
+        }
+        className="btn btn-primary btn-sm"
+      >
         Crear corral
       </button>
     </div>
