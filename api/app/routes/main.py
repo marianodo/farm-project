@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from app.models import PenVariable, Measurement, Pen, Cow, Variable, Field
 from app.extensions import db
 import enum
+from datetime import datetime
 
 
 class MyEnum(enum.Enum):
@@ -35,13 +36,32 @@ def manage_field():
             print(new_field)
             db.session.commit()
             return jsonify({'message': 'Campo creado exitosamente', 'field': new_field.to_dict()}), 201
+        except ValueError as e:
+            error_message = str(e)
+            return jsonify({'error': error_message}), 400
         except Exception as e:
             error_message = str(e)
             return jsonify({'error': error_message}), 500
     if request.method == 'GET':
      fields = Field.query.all()
-     serialized_fields = [field.to_dict() for field in fields]
+     serialized_fields = [field.to_dict(only=('id', 'name', 'pens.name','pens.pen_variable.variable.name','pens.id')) for field in fields]
      return serialized_fields, 200
+    
+@main_bp.route('/field/<int:field_id>', methods=['DELETE'])
+def delete_field(field_id):
+    field_to_delete = Field.query.get(field_id)
+
+    if not field_to_delete:
+        return jsonify({'error': 'No se encontró el campo a eliminar'}), 404
+    try:
+        db.session.delete(field_to_delete)
+        db.session.commit()
+        return jsonify({'message': 'Campor eliminado exitosamente'}), 200
+    except Exception as e:
+        db.session.rollback()
+        error_message = str(e)
+        return jsonify({'error': error_message}), 500
+    
 # COW ROUTES
 @main_bp.route('/cow', methods=['GET', 'POST'])
 def manage_cows():
@@ -50,15 +70,14 @@ def manage_cows():
         name = data.get('name')
         pen_id = data.get('pen_id') 
         try:
-         if not name:
-            new_cow = Cow(pen_id=pen_id )
-            db.session.add(new_cow)
-            db.session.commit()
-         else:
-            new_cow = Cow(name=name, pen_id=pen_id)
-            db.session.add(new_cow)
-            db.session.commit()
+         new_cow = Cow(name=name, pen_id=pen_id)
+         new_cow.validate()
+         db.session.add(new_cow)
+         db.session.commit()
          return jsonify({'message': 'Nueva vaca creada'}), 201
+        except ValueError as e:
+            error_message = str(e)
+            return jsonify({'error': error_message}), 400
         except Exception as e:
             error_message = str(e)
             return jsonify({'error': error_message}), 500
@@ -82,6 +101,7 @@ def manage_pen():
             variables = request.form.getlist('variableSelect')
         try:
             new_pen = Pen(name=name, field_id=field_id)
+            new_pen.validate()
             db.session.add(new_pen)
             db.session.commit()
             data, status = manage_penVariable(new_pen.id, variables)
@@ -90,10 +110,16 @@ def manage_pen():
             db.session.delete(new_pen)
             db.session.commit()
             return data, status
-        except IntegrityError as e:
-            db.session.rollback()  # Deshacer la transacción
-            error_info = str(e.__cause__)  # mensaje de error de la excepción
-            return jsonify({'error': error_info}), 409  # mensaje de error específico
+        except ValueError as e:
+            error_message = str(e)
+            return jsonify({'error': error_message}), 400
+        except Exception as e:
+            error_message = str(e)
+            return jsonify({'error': error_message}), 500
+        # except IntegrityError as e:
+        #     db.session.rollback()  # Deshacer la transacción
+        #     error_info = str(e.__cause__)  # mensaje de error de la excepción
+        #     return jsonify({'error': error_info}), 409  # mensaje de error específico
 
     if request.method == 'GET':
         variables = Variable.query.all()
@@ -103,6 +129,21 @@ def manage_pen():
         pens = Pen.query.all()
         serialized_pens = [pen.to_dict(only=('id','name','cows')) for pen in pens]
         return jsonify({'pens':serialized_pens, 'variables':serialized_variables, 'fields':serialized_fields})
+    
+@main_bp.route('/pen/<int:pen_id>', methods=['DELETE'])
+def delete_pen(pen_id):
+    pen_to_delete = Pen.query.get(pen_id)
+
+    if not pen_to_delete:
+        return jsonify({'error': 'No se encontró el corral a eliminar'}), 404
+    try:
+        db.session.delete(pen_to_delete)
+        db.session.commit()
+        return jsonify({'message': 'Corral eliminado exitosamente'}), 200
+    except Exception as e:
+        db.session.rollback()
+        error_message = str(e)
+        return jsonify({'error': error_message}), 500
     
 @main_bp.route('/penVariable', methods=['GET', 'POST'])
 def manage_penVariable(new_pen_id=None, variables=None):
@@ -126,10 +167,12 @@ def manage_penVariable(new_pen_id=None, variables=None):
 
             db.session.commit()
             return jsonify({'message': 'Relaciones Pen-Variable creadas exitosamente'}), 201 
-
+        except ValueError as e:
+            error_message = str(e)
+            return jsonify({'error': error_message}), 400
         except Exception as e:
-            db.session.rollback()  
-            return jsonify({'error': str(e)}), 500  
+            error_message = str(e)
+            return jsonify({'error': error_message}), 500
     if request.method == 'GET':
         penVariables = PenVariable.query.all()
         print("penv", penVariables)
@@ -150,31 +193,52 @@ def manage_measurement():
         if request.content_type == 'application/json':
             data = request.json
             cow_name = data.get('cow_name')
+            measurements = data.get('measurements')
             pen_id = data.get('pen_id')
-            pen_variable_id = data.get('pen_variable_id')
-            value = data.get('value')
         try:
-            new_cow = Cow(name=cow_name, pen_id=pen_id)
-            # new_cow = Cow(pen_id=pen_id)
+            new_cow = Cow(name=cow_name, pen_id=pen_id)    
             db.session.add(new_cow)
             db.session.commit()
-            new_measurement = Measurement(cow_id=new_cow.id, pen_variable_id=pen_variable_id, value=value)
-            db.session.add(new_measurement)
-            db.session.commit()
+            date = datetime.now()
+            for pen_variable_id in measurements:
+             new_measurement = Measurement(cow_id=new_cow.id, pen_variable_id=pen_variable_id, date=date, value=measurements[pen_variable_id])
+             db.session.add(new_measurement)
+             db.session.commit()
             return jsonify({'message': 'Medición creada correctamente'}), 201
+        except ValueError as e:
+            error_message = str(e)
+            return jsonify({'error': error_message}), 400
         except Exception as e:
-            return jsonify({'error': f'Error al crear la medición: {e}'}), 500
+            error_message = str(e)
+            return jsonify({'error': error_message}), 500
     if request.method == 'GET':
-        measurements = Measurement.query.all()
-        # return jsonify({'message': f'No se encontraron relaciones PenVariable para el pen_id {pen_id}'}), 404
-        serialized_measurement =[measurement.to_dict() for measurement in measurements]
-        return jsonify(serialized_measurement)
+        # measurements = Measurement.query.all()
+        # # return jsonify({'message': f'No se encontraron relaciones PenVariable para el pen_id {pen_id}'}), 404
+        # serialized_measurement =[m.to_dict(only=('id','value','pen_variable_id.id', 'pen_variable_id.custom_parameters', 'cow.id', 'cow.name', 'date')) for m in measurements]
+        # return jsonify(serialized_measurement)
+        measurements = Measurement.query.group_by(Measurement.date).all()
+        serialized_measurements = []
+        for m in measurements:
+         date_str = m.date.date().isoformat()
+         m_dict = m.to_dict(only=('id','value','pen_variable_id', 'cow_id'))
+        # Buscar si ya existe el objeto para esta fecha
+         date_obj = next((d for d in serialized_measurements if d["date"] == date_str), None)
+         if date_obj is not None:
+            # Si ya existe, agregar esta medición a la lista
+            date_obj["measurements"].append(m_dict)
+         else:
+            # Si no existe, crear un nuevo objeto con la fecha y la lista de mediciones
+            serialized_measurements.append({
+                "date": date_str,
+                "measurements": [m_dict]
+            })
+    return jsonify(serialized_measurements)
 
         
 @main_bp.route('/variable', methods=['GET', 'POST'])    
 def manage_variable():
     if request.method == 'POST':
-        try:    
+        try:
             if request.content_type == 'application/json':
                 data = request.json
                 print("DATA:", data)
@@ -251,10 +315,12 @@ def manage_variable():
             db.session.add(new_variable)
             db.session.commit()
             return jsonify({'message': 'Nueva variable creada con exito', 'variable_id': new_variable.id}), 201 
+        except ValueError as e:
+            error_message = str(e)
+            return jsonify({'error': error_message}), 400
         except Exception as e:
-            db.session.rollback()  # Deshacer la transacción
-            error_info = str(e.__cause__)  # mensaje de error de la excepción
-            return jsonify({'error': f'Error: {error_info}'}), 409  # mensaje de error específico
+            error_message = str(e)
+            return jsonify({'error': error_message}), 500
 
     if request.method == 'GET':
         variables = Variable.query.all()
