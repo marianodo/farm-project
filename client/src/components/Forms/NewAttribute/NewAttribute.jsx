@@ -1,33 +1,35 @@
-import { useState } from 'react';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
+
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   Button,
   FormControl,
-  FormLabel,
-  Input,
-  useDisclosure,
-  RadioGroup,
-  HStack,
-  Radio,
   FormHelperText,
-  Wrap,
+  FormLabel,
+  HStack,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Radio,
+  RadioGroup,
   Tooltip,
-} from '@chakra-ui/react';
-import axios from 'axios';
+  Wrap,
+  useDisclosure,
+} from "@chakra-ui/react";
+
+import { ToastContainer } from "react-toastify";
+import axios from "axios";
+import { useState } from "react";
 
 const NewAtributte = ({ addAttribute }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [attribute, setAttribute] = useState({
-    name: '',
-    type: 'number',
+    name: "",
+    type: "number",
     parameters: {
       granularity: 0.25,
       value: {
@@ -39,8 +41,8 @@ const NewAtributte = ({ addAttribute }) => {
     },
   });
   const [enumItems, setEnumItems] = useState([]);
-  const [enumInput, setEnumInput] = useState('');
-  const [boleanInput, setBoleanInput] = useState('true');
+  const [enumInput, setEnumInput] = useState("");
+  const [boleanInput, setBoleanInput] = useState("true");
   const [granularityInput, setGranularityInput] = useState(0.25);
   const [numberInput, setnumberInput] = useState({
     min: 1,
@@ -52,7 +54,7 @@ const NewAtributte = ({ addAttribute }) => {
   const postAttribute = () => {
     let body = attribute;
     //el id no deberia existir y se tiene que hacer el axios al back con la respuesta ejecutar el addAttribute
-    if (attribute.type === 'number') {
+    if (attribute.type === "number") {
       body = {
         ...attribute,
         parameters: { ...attribute.parameters, granularity: granularityInput },
@@ -82,13 +84,13 @@ const NewAtributte = ({ addAttribute }) => {
     });
   };
   const getDefaultByType = (value) => {
-    if (value === 'number') {
+    if (value === "number") {
       return numberInput;
     }
-    if (value === 'enum') {
+    if (value === "enum") {
       return enumItems;
     }
-    if (value === 'bolean') {
+    if (value === "bolean") {
       return boleanInput;
     }
   };
@@ -104,8 +106,8 @@ const NewAtributte = ({ addAttribute }) => {
 
   const resetAttribute = () => {
     setAttribute({
-      name: '',
-      type: 'number',
+      name: "",
+      type: "number",
       parameters: {
         value: {
           min: 1,
@@ -122,7 +124,7 @@ const NewAtributte = ({ addAttribute }) => {
   };
 
   const addEnumItem = () => {
-    if (enumInput != '' && !enumItems.find((value) => value === enumInput)) {
+    if (enumInput != "" && !enumItems.find((value) => value === enumInput)) {
       setEnumItems([...enumItems, enumInput]);
       setAttribute({
         ...attribute,
@@ -131,11 +133,11 @@ const NewAtributte = ({ addAttribute }) => {
         },
       });
     }
-    setEnumInput('');
+    setEnumInput("");
   };
 
   const handleEnumItemInput = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       addEnumItem();
     }
   };
@@ -198,7 +200,7 @@ const NewAtributte = ({ addAttribute }) => {
               </RadioGroup>
               <FormHelperText mb={4}>Valor por defecto</FormHelperText>
 
-              {attribute.type === 'number' && (
+              {attribute.type === "number" && (
                 <div>
                   <FormControl>
                     <FormLabel>Valor minimo</FormLabel>
@@ -252,7 +254,7 @@ const NewAtributte = ({ addAttribute }) => {
                   </FormControl>
                 </div>
               )}
-              {attribute.type === 'bolean' && (
+              {attribute.type === "bolean" && (
                 <div>
                   <RadioGroup
                     defaultValue="true"
@@ -268,7 +270,7 @@ const NewAtributte = ({ addAttribute }) => {
                   </RadioGroup>
                 </div>
               )}
-              {attribute.type === 'enum' && (
+              {attribute.type === "enum" && (
                 <div>
                   <Wrap>
                     {enumItems.map((value, i) => (
@@ -292,15 +294,15 @@ const NewAtributte = ({ addAttribute }) => {
                   </Wrap>
 
                   <FormControl
-                    alignItems={'center'}
-                    justifyContent={'start'}
-                    display={'flex'}
-                    flexWrap={'wrap'}
+                    alignItems={"center"}
+                    justifyContent={"start"}
+                    display={"flex"}
+                    flexWrap={"wrap"}
                   >
                     <Input
                       onChange={(e) => setEnumInput(e.target.value)}
                       onKeyDown={handleEnumItemInput}
-                      width={'70%'}
+                      width={"70%"}
                       m={2}
                       value={enumInput}
                       focusBorderColor="#1a1a1a"
@@ -320,7 +322,7 @@ const NewAtributte = ({ addAttribute }) => {
               bg="#1a1a1a"
               color="white"
               mr={3}
-              _hover={{ bg: '#1a1a1a', color: 'white' }}
+              _hover={{ bg: "#1a1a1a", color: "white" }}
               onClick={postAttribute}
             >
               Crear

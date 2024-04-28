@@ -1,37 +1,38 @@
 import {
   Box,
+  Flex,
   FormControl,
+  FormErrorMessage,
+  FormHelperText,
   FormLabel,
   HStack,
   Input,
-  Radio,
-  RadioGroup,
-  Wrap,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
   NumberInput,
   NumberInputField,
   NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  Flex,
+  Radio,
+  RadioGroup,
   Slider,
-  SliderTrack,
   SliderFilledTrack,
   SliderThumb,
-  FormHelperText,
-  FormErrorMessage,
-} from '@chakra-ui/react';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+  SliderTrack,
+  Wrap,
+} from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
 const CreateMeasurement = () => {
   const params = useParams();
   const [attributes, setAttributes] = useState([]);
   const [errors, setErrors] = useState({});
-  const [cowName, setCowName] = useState('');
+  const [cowName, setCowName] = useState("");
   const [data, setData] = useState({
-    cow_name: '',
-    pen_id: '',
+    cow_name: "",
+    pen_id: "",
     measurements: {},
   });
   const [values, setValues] = useState([]);
@@ -44,22 +45,22 @@ const CreateMeasurement = () => {
         [pen_variable_id]: value,
       },
     });
-    if (type === 'enum') validationEnum(pen_variable_id, value, parameters);
-    if (type === 'number') validationNumber(pen_variable_id, value, parameters);
-    if (type === 'bolean')
+    if (type === "enum") validationEnum(pen_variable_id, value, parameters);
+    if (type === "number") validationNumber(pen_variable_id, value, parameters);
+    if (type === "bolean")
       validationBoolean(pen_variable_id, value, parameters);
   };
 
   const handleChangeCow = (e) => {
-    if (e.target.value.trim() === '') {
+    if (e.target.value.trim() === "") {
       setErrors({
         ...errors,
-        cow_name: { message: 'El nombre de la vaca no puede estar vacio' },
+        cow_name: { message: "El nombre de la vaca no puede estar vacio" },
       });
     } else {
-      if (errors['cow_name']) {
+      if (errors["cow_name"]) {
         let newErrors = { ...errors };
-        delete newErrors['cow_name'];
+        delete newErrors["cow_name"];
         setErrors(newErrors);
       }
     }
@@ -97,12 +98,12 @@ const CreateMeasurement = () => {
     if (
       Number(value) % parameters.granularity !== 0 ||
       Number(value) > parameters.value.max ||
-      value == ''
+      value == ""
     ) {
       setErrors({
         ...errors,
         [pen_variable_id]: {
-          message: 'El numero ingresado debe respetar la granularidad',
+          message: "El numero ingresado debe respetar la granularidad",
         },
       });
     } else {
@@ -114,18 +115,18 @@ const CreateMeasurement = () => {
     }
   };
   const validationBoolean = (pen_variable_id, value, parameters) => {
-    if (value !== 'true' && value !== 'false') {
-      console.log('entre al if');
+    if (value !== "true" && value !== "false") {
+      console.log("entre al if");
       setErrors({
         ...errors,
         [pen_variable_id]: {
-          message: 'El valor seleccionado solo puede ser verdadero o falso',
+          message: "El valor seleccionado solo puede ser verdadero o falso",
         },
       });
     } else {
-      console.log('entre al else');
+      console.log("entre al else");
       if (errors[pen_variable_id]) {
-        console.log('entre al if del else');
+        console.log("entre al if del else");
         let newErrors = { ...errors };
         delete newErrors[pen_variable_id];
         setErrors(newErrors);
@@ -139,7 +140,7 @@ const CreateMeasurement = () => {
         ...errors,
         [pen_variable_id]: {
           message:
-            'El valor seleccionado tiene que estar entre los valores predefinidos',
+            "El valor seleccionado tiene que estar entre los valores predefinidos",
         },
       });
     } else {
@@ -158,7 +159,7 @@ const CreateMeasurement = () => {
       .get(`${import.meta.env.VITE_API_BASE_URL}/penVariable/${params.id}`)
       .then((response) => {
         response.data.forEach((prop) => {
-          defaultValues[prop.id] = '';
+          defaultValues[prop.id] = "";
         });
         setAttributes(response.data);
         setData({
@@ -174,15 +175,15 @@ const CreateMeasurement = () => {
     if (Object.keys(errorsEmpty).length > 0) {
       setErrors(errorsEmpty);
     } else {
-      axios.post('http://127.0.0.1:5000/measurement', data);
+      axios.post(`${import.meta.env.VITE_API_BASE_URL}/measurement`, data);
     }
   };
   function validErrors() {
     let emptyErrors = { ...errors };
     Object.keys(data.measurements).forEach((prop) => {
-      if (data.measurements[prop] === '') {
+      if (data.measurements[prop] === "") {
         emptyErrors[prop] = {
-          message: 'El campo es requerido',
+          message: "El campo es requerido",
         };
       }
     });
@@ -193,7 +194,7 @@ const CreateMeasurement = () => {
   return (
     <div>
       <h1>measurement</h1>
-      <FormControl mb={2} isInvalid={!!errors['cow_name']}>
+      <FormControl mb={2} isInvalid={!!errors["cow_name"]}>
         <FormLabel>Nombre de la vaca o ID:</FormLabel>
         <Input
           onChange={(e) => handleChangeCow(e)}
@@ -205,13 +206,13 @@ const CreateMeasurement = () => {
           focusBorderColor="#1a1a1a"
           placeholder="Toro Dorado"
         />
-        <FormErrorMessage fontWeight={'bold'} textShadow={'0.4px 0.4px black'}>
-          {errors['cow_name']?.message.toUpperCase()}
+        <FormErrorMessage fontWeight={"bold"} textShadow={"0.4px 0.4px black"}>
+          {errors["cow_name"]?.message.toUpperCase()}
         </FormErrorMessage>
       </FormControl>
       {attributes.map((prop, i) => (
         <Box key={i} mb={4}>
-          {prop.variable.type == 'number' && (
+          {prop.variable.type == "number" && (
             <FormControl isInvalid={!!errors[prop.id]}>
               <FormLabel>{prop.variable.name}:</FormLabel>
               <Flex>
@@ -271,15 +272,15 @@ const CreateMeasurement = () => {
                   Granularidad: {prop.custom_parameters.granularity}
                 </FormHelperText>
                 <FormErrorMessage
-                  fontWeight={'bold'}
-                  textShadow={'0.4px 0.4px black'}
+                  fontWeight={"bold"}
+                  textShadow={"0.4px 0.4px black"}
                 >
                   {errors[prop.id]?.message.toUpperCase()}
                 </FormErrorMessage>
               </Wrap>
             </FormControl>
           )}
-          {prop.variable.type == 'enum' && (
+          {prop.variable.type == "enum" && (
             <FormControl isInvalid={!!errors[prop.id]}>
               <FormLabel>{prop.variable.name}:</FormLabel>
               <RadioGroup
@@ -307,14 +308,14 @@ const CreateMeasurement = () => {
                 </HStack>
               </RadioGroup>
               <FormErrorMessage
-                fontWeight={'bold'}
-                textShadow={'0.4px 0.4px black'}
+                fontWeight={"bold"}
+                textShadow={"0.4px 0.4px black"}
               >
                 {errors[prop.id]?.message.toUpperCase()}
               </FormErrorMessage>
             </FormControl>
           )}
-          {prop.variable.type == 'bolean' && (
+          {prop.variable.type == "bolean" && (
             <FormControl isInvalid={!!errors[prop.id]}>
               <FormLabel>{prop.variable.name}:</FormLabel>
               <RadioGroup
@@ -337,8 +338,8 @@ const CreateMeasurement = () => {
                 </HStack>
               </RadioGroup>
               <FormErrorMessage
-                fontWeight={'bold'}
-                textShadow={'0.4px 0.4px black'}
+                fontWeight={"bold"}
+                textShadow={"0.4px 0.4px black"}
               >
                 {errors[prop.id]?.message.toUpperCase()}
               </FormErrorMessage>
