@@ -47,7 +47,7 @@ const CreateMeasurement = () => {
     });
     if (type === "enum") validationEnum(pen_variable_id, value, parameters);
     if (type === "number") validationNumber(pen_variable_id, value, parameters);
-    if (type === "bolean")
+    if (type === "boolean")
       validationBoolean(pen_variable_id, value, parameters);
   };
 
@@ -315,7 +315,7 @@ const CreateMeasurement = () => {
               </FormErrorMessage>
             </FormControl>
           )}
-          {prop.variable.type == "bolean" && (
+          {prop.variable.type == "boolean" && (
             <FormControl isInvalid={!!errors[prop.id]}>
               <FormLabel>{prop.variable.name}:</FormLabel>
               <RadioGroup

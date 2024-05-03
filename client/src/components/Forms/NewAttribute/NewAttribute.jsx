@@ -25,30 +25,30 @@ import { ToastContainer } from "react-toastify";
 import axios from "axios";
 import { useState } from "react";
 
-const NewAtributte = ({ addAttribute }) => {
+const NewAtributte = ({ messageToast, addAttribute }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [attribute, setAttribute] = useState({
     name: "",
     type: "number",
     parameters: {
-      granularity: 0.25,
+      granularity: 1,
       value: {
         min: 1,
-        max: 1000,
-        optimo_min: 100,
-        optimo_max: 500,
+        max: 10,
+        optimo_min: 4,
+        optimo_max: 6,
       },
     },
   });
   const [enumItems, setEnumItems] = useState([]);
   const [enumInput, setEnumInput] = useState("");
-  const [boleanInput, setBoleanInput] = useState("true");
-  const [granularityInput, setGranularityInput] = useState(0.25);
+  const [booleanInput, setBooleanInput] = useState("true");
+  const [granularityInput, setGranularityInput] = useState(1);
   const [numberInput, setnumberInput] = useState({
     min: 1,
-    max: 1000,
-    optimo_min: 100,
-    optimo_max: 500,
+    max: 10,
+    optimo_min: 4,
+    optimo_max: 6,
   });
 
   const postAttribute = () => {
@@ -65,13 +65,14 @@ const NewAtributte = ({ addAttribute }) => {
       .then((response) => {
         addAttribute(response.data);
         onClose();
+        messageToast(response.data.message, "success");
       })
-      .catch((error) => console.log(error));
+      .catch((error) => messageToast(error.response.data.error));
   };
   const handleName = (e) => {
     setAttribute({
       ...attribute,
-      name: e.target.value,
+      name: e.target.value.toUpperCase(),
     });
   };
   const handleRadio = (value) => {
@@ -90,12 +91,12 @@ const NewAtributte = ({ addAttribute }) => {
     if (value === "enum") {
       return enumItems;
     }
-    if (value === "bolean") {
-      return boleanInput;
+    if (value === "boolean") {
+      return booleanInput;
     }
   };
-  const handleBoleanInput = (value) => {
-    setBoleanInput(value);
+  const handleBooleanInput = (value) => {
+    setBooleanInput(value);
     setAttribute({
       ...attribute,
       parameters: {
@@ -171,7 +172,14 @@ const NewAtributte = ({ addAttribute }) => {
         Crear atributo
       </button>
 
-      <Modal isCentered isOpen={isOpen} onClose={onClose}>
+      <Modal
+        isCentered
+        isOpen={isOpen}
+        onClose={() => {
+          setEnumItems([]);
+          onClose();
+        }}
+      >
         <ModalOverlay />
         <ModalContent marginX={6}>
           <ModalHeader>Nuevo atributo</ModalHeader>
@@ -193,7 +201,7 @@ const NewAtributte = ({ addAttribute }) => {
                 <HStack spacing="1rem">
                   <Wrap>
                     <Radio value="number">Numerico</Radio>
-                    <Radio value="bolean">Boleano</Radio>
+                    <Radio value="boolean">Booleano</Radio>
                     <Radio value="enum">Lista</Radio>
                   </Wrap>
                 </HStack>
@@ -254,12 +262,12 @@ const NewAtributte = ({ addAttribute }) => {
                   </FormControl>
                 </div>
               )}
-              {attribute.type === "bolean" && (
+              {attribute.type === "boolean" && (
                 <div>
                   <RadioGroup
                     defaultValue="true"
-                    value={boleanInput}
-                    onChange={handleBoleanInput}
+                    value={booleanInput}
+                    onChange={handleBooleanInput}
                   >
                     <HStack spacing="1rem">
                       <Wrap>
@@ -300,7 +308,9 @@ const NewAtributte = ({ addAttribute }) => {
                     flexWrap={"wrap"}
                   >
                     <Input
-                      onChange={(e) => setEnumInput(e.target.value)}
+                      onChange={(e) =>
+                        setEnumInput(e.target.value.toUpperCase())
+                      }
                       onKeyDown={handleEnumItemInput}
                       width={"70%"}
                       m={2}
@@ -329,6 +339,7 @@ const NewAtributte = ({ addAttribute }) => {
             </Button>
             <Button
               onClick={() => {
+                setEnumItems([]);
                 onClose();
               }}
             >

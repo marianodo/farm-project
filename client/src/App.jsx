@@ -1,26 +1,29 @@
-import { Routes, Route } from 'react-router-dom';
-import './App.css';
-import Home from './views/Home/Home';
-import NavBar from './components/NavBar/NavBar';
+import "./App.css";
+import "react-toastify/dist/ReactToastify.css";
+
+import { Route, Routes } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+
+import CreateField from "./components/Forms/CreateField/CreateField";
+import CreateMeasurement from "./components/Forms/CreateMeasurement/CreateMeasurement";
+import CreatePen from "./components/Forms/CreatePen/CreatePen";
+import CreateVariable from "./components/Forms/CreateVariable/CreateVariable";
+import NavBar from "./components/NavBar/NavBar";
+import NewPen from "./components/Forms/NewPen/NewPen";
+import NewReport from "./components/Forms/NewReport/NewReport";
+
 // import FormNavBar from './components/Forms/FormNavBar';
-import CreateField from './components/Forms/CreateField/CreateField';
-import CreateVariable from './components/Forms/CreateVariable/CreateVariable';
-import CreatePen from './components/Forms/CreatePen/CreatePen';
-import CreateMeasurement from './components/Forms/CreateMeasurement/CreateMeasurement';
-import NewPen from './components/Forms/NewPen/NewPen';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const messageToast = (message, type) => {
-    if (type === 'success') {
+    if (type === "success") {
       toast.success(message, {
-        position: 'top-right',
+        position: "top-right",
         autoClose: 1200,
       });
     } else {
       toast.error(message, {
-        position: 'top-right',
+        position: "top-right",
         autoClose: 1200,
       });
     }
@@ -32,7 +35,7 @@ function App() {
       {/* <FormNavBar /> */}
       <ToastContainer />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<CreateField messageToast={messageToast} />} />
         <Route
           exact
           path="/field"
@@ -44,6 +47,11 @@ function App() {
           exact
           path="/newPen/:field/:id"
           element={<NewPen messageToast={messageToast} />}
+        />
+        <Route
+          exact
+          path="/newReport/:field/:id"
+          element={<NewReport messageToast={messageToast} />}
         />
         <Route exact path="/measurement/:id" element={<CreateMeasurement />} />
       </Routes>

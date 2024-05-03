@@ -1,25 +1,27 @@
-import { useState } from "react";
 import {
+  Button,
   FormControl,
   FormLabel,
+  HStack,
   Input,
-  Tooltip,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
-  useDisclosure,
-  Text,
-  Button,
-  RadioGroup,
-  HStack,
-  Wrap,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Radio,
+  RadioGroup,
+  Text,
+  Tooltip,
+  Wrap,
+  useDisclosure,
 } from "@chakra-ui/react";
+
 import { EditIcon } from "@chakra-ui/icons";
+import { useState } from "react";
+
 export default function EditAttribute({
   messageToast,
   attribute,
@@ -61,11 +63,11 @@ export default function EditAttribute({
       });
     }
 
-    if (type === "bolean"){
+    if (type === "boolean") {
       setEditAtributte({
         ...editAttribute,
         default_parameters: {
-          value: selectValue
+          value: selectValue,
         },
       });
     }
@@ -174,12 +176,12 @@ export default function EditAttribute({
                 </FormControl>
               </>
             )}
-            {editAttribute.type === "bolean" && (
+            {editAttribute.type === "boolean" && (
               <>
                 <RadioGroup
                   defaultValue="true"
                   value={editAttribute.default_parameters.value}
-                  onChange={(e)=> onChange(e,editAttribute.type,e)}
+                  onChange={(e) => onChange(e, editAttribute.type, e)}
                 >
                   <HStack spacing="1rem">
                     <Wrap>

@@ -19,7 +19,17 @@ import React, { useState } from "react";
 import { ToastContainer } from "react-toastify";
 import axios from "axios";
 
-const ModalField = ({ addField, messageToast }) => {
+const ModalField = ({
+  setFields,
+  fieldId,
+  fieldName,
+  setFieldName,
+  editOpen,
+  edit,
+  setEdit,
+  addField,
+  messageToast,
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [inputField, setInputField] = useState("");
   const [isFormInvalid, setIsFormInvalid] = useState(true);
@@ -46,7 +56,7 @@ const ModalField = ({ addField, messageToast }) => {
       setIsFormInvalid(false);
     }
   };
-  console.log(inputField[0] == " ");
+
   const postField = () => {
     if (inputField) {
       axios
@@ -61,10 +71,11 @@ const ModalField = ({ addField, messageToast }) => {
           messageToast(response.data.message, "success");
         })
         .catch((error) => {
-          messageToast(error.response.data.error);
+          messageToast(error.response?.data.error);
         });
     }
   };
+  console.log(edit);
   return (
     <>
       <Button
@@ -79,47 +90,107 @@ const ModalField = ({ addField, messageToast }) => {
       >
         Crear Campo
       </Button>
+      {edit !== true ? (
+        <>
+          <Modal isCentered isOpen={isOpen} onClose={handleClose}>
+            <ModalOverlay />
+            <ModalContent marginX={6}>
+              <ModalHeader>Crear campo</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody pb={6}>
+                <FormControl>
+                  <FormLabel>Nombre del campo</FormLabel>
+                  <Input
+                    onChange={(e) => handleChange(e)}
+                    onKeyDown={(e) => (e.key === "Enter" ? postField() : null)}
+                    value={inputField}
+                    autoFocus={true}
+                    focusBorderColor="#1a1a1a"
+                    placeholder="Campo Maravilla"
+                  />
+                  {errorMessage && <p>{errorMessage}</p>}
+                </FormControl>
+              </ModalBody>
 
-      <Modal
-        style={{ bg: "red" }}
-        isCentered
-        isOpen={isOpen}
-        onClose={handleClose}
-      >
-        <ModalOverlay />
-        <ModalContent marginX={6}>
-          <ModalHeader>Crear campo</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <FormControl>
-              <FormLabel>Nombre del campo</FormLabel>
-              <Input
-                onChange={(e) => handleChange(e)}
-                onKeyDown={(e) => (e.key === "Enter" ? postField() : null)}
-                value={inputField}
-                autoFocus={true}
-                focusBorderColor="#1a1a1a"
-                placeholder="Campo Maravilla"
-              />
-              {errorMessage && <p>{errorMessage}</p>}
-            </FormControl>
-          </ModalBody>
+              <ModalFooter>
+                <Button
+                  bg="#1a1a1a"
+                  color="white"
+                  mr={3}
+                  _hover={{ bg: "#1a1a1a", color: "white" }}
+                  onClick={postField}
+                  isDisabled={isFormInvalid}
+                >
+                  Crear
+                </Button>
+                <Button onClick={handleClose}>Cancelar</Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+        </>
+      ) : (
+        <>
+          <Modal
+            isOpen={editOpen}
+            onClose={() => {
+              setEdit(false);
+            }}
+            isCentered
+          >
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Editar nombre</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody pb={6}>
+                <FormControl>
+                  <Input
+                    placeholder="First name"
+                    value={fieldName}
+                    onChange={(e) => {
+                      setFieldName(e.target.value);
+                    }}
+                  />
+                </FormControl>
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  bg="#1a1a1a"
+                  color="white"
+                  mr={3}
+                  _hover={{ bg: "#1a1a1a", color: "white" }}
+                  onClick={
+                    (console.log(fieldName),
+                    async () => {
+                      try {
+                        const response = await axios.put(
+                          `${import.meta.env.VITE_API_BASE_URL}/${fieldId}`,
+                          { fieldName: fieldName }
+                        );
+                        const fields = (
+                          await axios.get(
+                            `${import.meta.env.VITE_API_BASE_URL}/field`
+                          )
+                        ).data;
+                        setFields(fields ? fields : []);
+                        messageToast(response.data.message, "success");
+                        setEdit(false);
+                      } catch (error) {
+                        messageToast(error.response.data.error);
+                      }
+                    })
 
-          <ModalFooter>
-            <Button
-              bg="#1a1a1a"
-              color="white"
-              mr={3}
-              _hover={{ bg: "#1a1a1a", color: "white" }}
-              onClick={postField}
-              isDisabled={isFormInvalid}
-            >
-              Crear
-            </Button>
-            <Button onClick={handleClose}>Cancelar</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+                    // .then(() => setEdit(false))
+                    // .catch((e) => console.log(e))
+                  }
+                >
+                  Guardar
+                </Button>
+                <Button onClick={() => setEdit(false)}>Cancelar</Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+        </>
+      )}
     </>
   );
 };

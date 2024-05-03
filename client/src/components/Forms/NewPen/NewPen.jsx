@@ -1,22 +1,42 @@
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import NewAtributte from '../NewAttribute/NewAttribute';
-import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
-import { FormControl, FormLabel, Input, Tooltip } from '@chakra-ui/react';
-import { Navigate } from 'react-router-dom';
-import axios from 'axios';
-import EditAttribute from '../EditAttribute/EditAttribute';
+import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
+import {
+  Box,
+  FormControl,
+  FormLabel,
+  Input,
+  Tag,
+  Text,
+  Tooltip,
+  Wrap,
+  WrapItem,
+} from "@chakra-ui/react";
+import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+import EditAttribute from "../EditAttribute/EditAttribute";
+import { Navigate } from "react-router-dom";
+import NewAtributte from "../NewAttribute/NewAttribute";
+import axios from "axios";
 
 const NewPen = ({ messageToast }) => {
   const params = useParams();
   const [attributes, setAttributes] = useState([]);
-
+  const [pens, setPens] = useState([]);
   const [redirect, setRedirect] = useState(false);
   const [data, setData] = useState({
     field_id: parseInt(params.id),
-    name: '',
+    name: "",
     variables: [],
   });
+
+  const resetStates = () => {
+    setData({
+      field_id: parseInt(params.id),
+      name: "",
+      variables: [],
+    });
+  };
+
   const onSubmit = () => {
     let body = {
       ...data,
@@ -28,12 +48,18 @@ const NewPen = ({ messageToast }) => {
     axios
       .post(`${import.meta.env.VITE_API_BASE_URL}/pen`, body)
       .then((response) => {
-        messageToast(response.data.message, 'success');
-        setRedirect(true);
+        messageToast(response.data.message, "success");
+        // setRedirect(true);
+        addNewPen(data.name);
+        resetStates();
       })
       .catch((error) => {
         messageToast(error.response.data.error);
       });
+  };
+
+  const addNewPen = (pen) => {
+    setPens([...pens, pen]);
   };
 
   const addNewAttribute = (attribute) => {
@@ -74,6 +100,17 @@ const NewPen = ({ messageToast }) => {
       .catch((error) => console.log(error));
   }, [attributes.length]);
 
+  useEffect(() => {
+    axios
+      .get(`${import.meta.env.VITE_API_BASE_URL}/field/${params.id}`)
+      .then((response) => {
+        setPens(response.data.pens);
+      })
+      .catch((error) => console.log(error));
+  }, [pens.length, params.id]);
+
+  console.log("ATRIBUTOS", attributes);
+  console.log("pens", pens);
   function editAttribute(attribute) {
     setData({
       ...data,
@@ -90,7 +127,20 @@ const NewPen = ({ messageToast }) => {
   return (
     <div>
       <h2 className="text-center">{params.field}</h2>
-
+      <Box display={"flex"} flexDirection={"column"} w="100%" marginTop={4}>
+        <Text textAlign={"center"} as="u" fontWeight={600} marginBottom={4}>
+          Corrales asociados:
+        </Text>
+        <Wrap marginBottom={2} alignSelf={"center"}>
+          {pens.map((e, i) => (
+            <WrapItem key={i}>
+              <Tooltip label="Corral">
+                <Tag p>{e.name}</Tag>
+              </Tooltip>
+            </WrapItem>
+          ))}
+        </Wrap>
+      </Box>
       <FormControl>
         <FormLabel>Nombre del Corral:</FormLabel>
         <Input
@@ -98,6 +148,7 @@ const NewPen = ({ messageToast }) => {
           id="name"
           name="name"
           autoFocus={true}
+          value={data.name}
           onChange={handleChange}
           required
           focusBorderColor="#1a1a1a"
@@ -111,13 +162,13 @@ const NewPen = ({ messageToast }) => {
           {data.variables.map((attribute, i) => (
             <div
               key={`${attribute.name}-${i}`}
-              className={'badge bg-primary m-2  d-flex '}
+              className={"badge bg-primary m-2  d-flex "}
             >
               <Tooltip
                 label={JSON.stringify(attribute.default_parameters)}
                 placement="top"
               >
-                <span className={'m-1 text-uppercase align-content-center'}>
+                <span className={"m-1 text-uppercase align-content-center"}>
                   {attribute.name}
                 </span>
               </Tooltip>
@@ -139,7 +190,10 @@ const NewPen = ({ messageToast }) => {
       <div className="card border-primary bg-transparent mb-3 my-2">
         <div className="card-header d-flex  justify-content-between">
           <span className="align-content-center">Atributos</span>
-          <NewAtributte addAttribute={addNewAttribute} />
+          <NewAtributte
+            messageToast={messageToast}
+            addAttribute={addNewAttribute}
+          />
         </div>
         <div className=" d-flex flex-wrap">
           {attributes.map((attribute, i) => {
@@ -149,8 +203,8 @@ const NewPen = ({ messageToast }) => {
                 <span
                   className={
                     inUse
-                      ? 'badge bg-secondary text-uppercase p-2 '
-                      : 'badge text-uppercase bg-dark p-2'
+                      ? "badge bg-secondary text-uppercase p-2 "
+                      : "badge text-uppercase bg-dark p-2"
                   }
                 >
                   {attribute.name}
@@ -175,7 +229,7 @@ const NewPen = ({ messageToast }) => {
         to="/field"
         className="btn btn-secondary btn-sm align-content-center mx-2"
       >
-        Cancelar
+        Volver
       </Link>
     </div>
   );

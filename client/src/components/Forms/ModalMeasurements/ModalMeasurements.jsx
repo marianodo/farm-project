@@ -16,25 +16,18 @@ import { useEffect, useState } from "react";
 
 import axios from "axios";
 
-const ModalReport = ({ pen_id, setReports }) => {
+const ModalMeasurements = ({ pen_id, addMeasurements }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [attributes, setAttributes] = useState([]);
-  const [data, setData] = useState({
-    cow_name: "",
-    pen_id: "",
-    measurements: {},
-  });
+  const [measurements, setMeasurements] = useState({});
   const handleClick = (e) => {
     e.stopPropagation();
     onOpen();
   };
-  const handleChange = () => {
-    setReports((prevReports) => ({
-      ...prevReports,
-    }));
-    // Actualizamos el valor del input
+  const handleChange = (e) => {
+    setMeasurements({ ...measurements, [e.target.name]: e.target.value });
   };
-
+  console.log("corral measurments:", measurements);
   useEffect(() => {
     let defaultValues = {};
     axios
@@ -44,18 +37,27 @@ const ModalReport = ({ pen_id, setReports }) => {
           defaultValues[prop.id] = "";
         });
         setAttributes(response.data);
-        setData({
-          ...data,
-          pen_id: parseInt(pen_id),
-          measurements: defaultValues,
+        setMeasurements({
+          ...defaultValues,
         });
       })
       .catch((error) => console.log(error));
   }, []);
-  console.log(attributes);
+
   return (
     <>
-      <Button onClick={handleClick}>Abrir Modal</Button>
+      <Button
+        bg="#18181b"
+        color="white"
+        size="sm"
+        px={[2, 3]}
+        fontSize={["8.4px", "10px"]}
+        textTransform="uppercase"
+        _hover={{ bg: "white", color: "#1a1a1a" }}
+        onClick={handleClick}
+      >
+        Medir
+      </Button>
       <Modal
         isCentered
         onClose={onClose}
@@ -71,7 +73,8 @@ const ModalReport = ({ pen_id, setReports }) => {
               <FormControl key={i} mt={4}>
                 <FormLabel>{e.variable.name}</FormLabel>
                 <Input
-                  placeholder={`Enter s`}
+                  name={e.id}
+                  placeholder={``}
                   //   value={value[]} // Asignamos el valor del input
                   onChange={handleChange} // Asignamos el evento onChange
                 />
@@ -79,7 +82,14 @@ const ModalReport = ({ pen_id, setReports }) => {
             ))}
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={3}>
+            <Button
+              onClick={() => {
+                addMeasurements(measurements);
+                onClose();
+              }}
+              colorScheme="blue"
+              mr={3}
+            >
               Save
             </Button>
             <Button onClick={onClose}>Cancel</Button>
@@ -90,4 +100,4 @@ const ModalReport = ({ pen_id, setReports }) => {
   );
 };
 
-export default ModalReport;
+export default ModalMeasurements;

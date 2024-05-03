@@ -1,7 +1,7 @@
 from flask import Blueprint
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from sqlalchemy.exc import IntegrityError
-from app.models import PenVariable, Measurement, Pen, Variable, Field, Report
+from app.models import PenVariable, Measurement, Pen, Variable, Field, Report, TypeOfObject, Object
 from app.extensions import db
 import enum
 from datetime import datetime
@@ -47,24 +47,70 @@ def manage_field():
     if request.method == 'GET':
         fields = Field.query.all()
         serialized_fields = [field.to_dict(only=(
-            'id', 'name', 'pens.name', 'pens.pen_variable', 'pens.id')) for field in fields]
+            'id', 'name', 'pens.name', 'pens.pen_variable', 'pens.id', 'reports')) for field in fields]
         return serialized_fields, 200
 
 
-@main_bp.route('/field/<int:field_id>', methods=['DELETE'])
-def delete_field(field_id):
-    field_to_delete = Field.query.get(field_id)
+@main_bp.route('/field/<int:field_id>', methods=['GET', 'DELETE', 'PUT'])
+def manage_one_field(field_id):
+    if request.method == 'GET':
+        try:
+            field = Field.query.get(field_id)
+            if not field:
+                return jsonify({'error': 'No se encontró el campo'}), 404
+            serialized_field = field.to_dict(only=(
+                'id', 'name', 'pens.name', 'pens.pen_variable', 'pens.id'))
+            return serialized_field, 200
+        except Exception as e:
+            db.session.rollback()
+            error_message = str(e)
+            return jsonify({'error': error_message}), 500
+    if request.method == 'DELETE':
+        field_to_delete = Field.query.get(field_id)
+        if not field_to_delete:
+            return jsonify({'error': 'No se encontró el campo a eliminar'}), 404
+        try:
+            db.session.delete(field_to_delete)
+            db.session.commit()
+            return jsonify({'message': 'Campor eliminado exitosamente'}), 200
+        except Exception as e:
+            db.session.rollback()
+            error_message = str(e)
+            return jsonify({'error': error_message}), 500
+    if request.method == 'PUT':
+        try:
+            data = request.json
+            new_name = data.get('fieldName')
+            field = Field.query.get_or_404(field_id)
+            if new_name and new_name.lower() != field.name.lower():
+                field.name = new_name
+                db.session.commit()
+                return jsonify({'message': 'Campo actualizado exitosamente'}), 200
+            field.validate()
+        except ValueError as e:
+            error_message = str(e)
+            return jsonify({'error': error_message}), 400
+        except Exception as e:
+            db.session.rollback()
+            error_message = str(e)
+            return jsonify({'error': error_message}), 500
+    # if request.method == 'PATCH':
+    #     try:
+    #         variable = Variable.query.get_or_404(variable_id)
+    #         data = request.json
+    #         new_name = data.get('name')
+    #         if new_name and new_name.lower() != variable.name.lower():
+    #             variable.name = new_name
+    #             db.session.commit()
+    #             return jsonify({'message': 'Variable modificada correctamente'}), 200
+    #         variable.validate()
+    #     except ValueError as e:
+    #         db.session.rollback()
+    #         return jsonify({'error': str(e)}), 400
+    #     except Exception as e:
+    #         db.session.rollback()
+    #         return jsonify({'error': str(e)}), 500
 
-    if not field_to_delete:
-        return jsonify({'error': 'No se encontró el campo a eliminar'}), 404
-    try:
-        db.session.delete(field_to_delete)
-        db.session.commit()
-        return jsonify({'message': 'Campor eliminado exitosamente'}), 200
-    except Exception as e:
-        db.session.rollback()
-        error_message = str(e)
-        return jsonify({'error': error_message}), 500
 
 # PEN ROUTES
 
@@ -103,23 +149,30 @@ def manage_pen():
             only=('id', 'name')) for field in fields]
         pens = Pen.query.all()
         serialized_pens = [pen.to_dict(
-            only=('id', 'name', 'cows')) for pen in pens]
+            only=('id', 'name')) for pen in pens]
         return jsonify({'pens': serialized_pens, 'variables': serialized_variables, 'fields': serialized_fields})
 
 
-@main_bp.route('/report', methods=['GET', 'POST'])
+@main_bp.route('/report', methods=['GET', 'POST', 'DELETE'])
 def manage_report():
     if request.method == 'POST':
         data = request.json
         name = data.get('name')
         comment = data.get('comment')
+        field_id = data.get('field_id')
+        # measurements = data.get('measurements')
+        # object_id = data.get('object_id')
+
         date = datetime.now()
         try:
-            new_report = Report(name=name, comment=comment, date=date)
+            new_report = Report(name=name, comment=comment,
+                                field_id=field_id, date=date)
             print(new_report)
             db.session.add(new_report)
             db.session.commit()
-            return jsonify({'message': 'Nuevo reporte creado'}), 201
+            # manage_measurement(new_report.id, measurements, object_id)
+            serialized_report = new_report.to_dict()
+            return jsonify({'message': f'Nuevo reporte creado.', 'report': serialized_report}), 201
         except ValueError as e:
             error_message = str(e)
             return jsonify({'error': error_message}), 400
@@ -131,6 +184,68 @@ def manage_report():
         reports = Report.query.all()
         serialized_reports = [report.to_dict() for report in reports]
         return jsonify(serialized_reports)
+    if request.method == 'DELETE':
+        try:
+            reports = Report.query.filter(~Report.measurement.any()).all()
+            for report in reports:
+                if report.measurement.count() == 0:
+                    db.session.delete(report)
+                    db.session.commit()
+                    print(f'Reporte con ID {
+                          report.id} eliminado correctamente.')
+                # return jsonify({'message': 'Informes sin mediciones asociadas eliminados correctamente.'}), 200
+            return jsonify({'message': 'Informes sin mediciones asociadas eliminados correctamente.'}), 400
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': f'Ocurrió un error al eliminar los informes: {str(e)}'}), 500
+
+
+@main_bp.route('/typeofobjects', methods=['GET', 'POST'])
+def manage_get_type_of_objects():
+    if request.method == 'GET':
+        typeofobjects = TypeOfObject.query.all()
+        print(typeofobjects)
+        serialized = [type_obj.to_dict() for type_obj in typeofobjects]
+        return jsonify(serialized)
+    if request.method == 'POST':
+        data = request.json
+        name = data.get('name')
+        try:
+            new_typeofobject = TypeOfObject(name=name)
+            db.session.add(new_typeofobject)
+            db.session.commit()
+            return jsonify({'message': 'Nuevo tipo de objeto creado'}), 201
+        except ValueError as e:
+            error_message = str(e)
+            return jsonify({'error': error_message}), 400
+        except Exception as e:
+            db.session.rollback()
+            error_message = str(e)
+            return jsonify({'error': error_message}), 500
+
+
+@main_bp.route('/object', methods=['GET', 'POST'])
+def manage_object():
+    if request.method == 'GET':
+        objects = Object.query.all()
+        serialized = [obj.to_dict() for obj in objects]
+        return jsonify(serialized)
+    if request.method == 'POST':
+        data = request.json
+        name = data.get('name')
+        typeid = data.get('typeid')
+        try:
+            newobj = Object(name=name, type_of_object_id=typeid)
+            db.session.add(newobj)
+            db.session.commit()
+            return jsonify({'message': 'Nuevo objeto creado'}), 201
+        except ValueError as e:
+            errormessage = str(e)
+            return jsonify({'error': errormessage}), 400
+        except Exception as e:
+            db.session.rollback()
+            errormessage = str(e)
+            return jsonify({'error': errormessage}), 500
 
 
 @main_bp.route('/penVariablee', methods=['POST'])
@@ -203,7 +318,6 @@ def manage_penVariable(new_pen_id=None, variables=None):
             return jsonify({'error': error_message}), 500
     if request.method == 'GET':
         penVariables = PenVariable.query.all()
-        print("penv", penVariables)
         serialized_penVariables = [pen_variable.to_dict(rules=('-pen', '-variable'))
                                    for pen_variable in penVariables]
         return jsonify(serialized_penVariables)
@@ -220,23 +334,26 @@ def get_penVariables_by_pen_id(pen_id):
 
 
 @main_bp.route('/measurement', methods=['GET', 'POST'])
-def manage_measurement():
+def manage_measurement(report_id=None, measurements=None, object_id=None):
     if request.method == 'POST':
-        if request.content_type == 'application/json':
-            data = request.json
-            pen_variable_id = data.get('pen_variable_id')
-            value = data.get('value')
-            report_id = data.get('report_id')
-            measurements = data.get('measurements')
         try:
 
             # for pen_variable_id in measurements:
             #     new_measurement = Measurement(
             # date = datetime.now()
-            new_measurement = Measurement(
-                pen_variable_id=pen_variable_id, value=value, report_id=report_id)
-            db.session.add(new_measurement)
-            db.session.commit()
+            # new_measurement = Measurement(
+            #     pen_variable_id=pen_variable_id, value=value, report_id=report_id)
+            # db.session.add(new_measurement)
+            # db.session.commit()
+            data = request.json
+            # report_id = data.get('report_id')
+            # measurements = data.get('measurements')
+            # object_id = data.get('object_id')
+            for pen_variable_id in measurements:
+                new_measurement = Measurement(
+                    report_id=report_id, pen_variable_id=pen_variable_id, value=measurements[pen_variable_id], object_id=object_id)
+                db.session.add(new_measurement)
+                db.session.commit()
             return jsonify({'message': 'Medición creada correctamente'}), 201
         except ValueError as e:
             error_message = str(e)
@@ -306,9 +423,6 @@ def manage_variable():
 
                 if not isinstance(parameters['value'], list):
                     return jsonify({'error': 'El valor de los parámetros para una variable enum debe ser una lista'}), 400
-            elif type == 'boolean':
-                if not name:
-                    return jsonify({'error': 'No se ha indicado el nombre de la variable.'}), 400
             new_variable = Variable(
                 name=name, type=type, default_parameters=parameters)
             new_variable.validate()
@@ -329,3 +443,32 @@ def manage_variable():
         serialized_variables = [variable.to_dict(
             only=('id', 'name', 'type', 'default_parameters')) for variable in variables]
         return serialized_variables
+
+
+@main_bp.route('/variable/<int:variable_id>', methods=['PATCH', 'DELETE'])
+def manage_modify_variable(variable_id):
+    if request.method == 'PATCH':
+        try:
+            variable = Variable.query.get_or_404(variable_id)
+            data = request.json
+            new_name = data.get('name')
+            if new_name and new_name.lower() != variable.name.lower():
+                variable.name = new_name
+                db.session.commit()
+                return jsonify({'message': 'Variable modificada correctamente'}), 200
+            variable.validate()
+        except ValueError as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+    if request.method == 'DELETE':
+        try:
+            variable = Variable.query.get_or_404(variable_id)
+            db.session.delete(variable)
+            db.session.commit()
+            return jsonify({'message': 'Variable eliminada exitosamente.'}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500

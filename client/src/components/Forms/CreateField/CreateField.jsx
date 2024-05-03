@@ -15,36 +15,57 @@ import {
   Tooltip,
   Wrap,
   WrapItem,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { useEffect, useState } from "react";
 
+import CorralReport from "../ModalMeasurements/ModalMeasurements";
 import { Link } from "react-router-dom";
 import ModalField from "./ModalField";
-import ModalReport from "../ModalReport/ModalReport";
+import ModalReport from "./ModalReport";
 import axios from "axios";
 
 const CreateField = ({ messageToast }) => {
   const [fields, setFields] = useState([]);
-  const [reports, setReports] = useState({});
+  const [measurements, setMeasurements] = useState({});
+  const [edit, setEdit] = useState(false);
+  const { onOpen } = useDisclosure();
+  const [fieldName, setFieldName] = useState("");
+  const [fieldId, setFieldId] = useState("");
 
   // const [isChecked, setIsChecked] = useState(false);
   const addField = (field) => {
     setFields([...fields, field]);
   };
+
+  const getSizeMeasurements = (field_id) => {
+    const fieldFound = fields.find((field) => field.id === field_id);
+    if (!fieldFound) {
+      return 0;
+    }
+    let size_variable = 0;
+    fieldFound.pens.forEach((e) => {
+      size_variable = size_variable + e.pen_variable.length;
+    });
+    return size_variable;
+  };
+
+  const addMeasurements = (measurement) => {
+    setMeasurements({ ...measurements, ...measurement });
+  };
+
   useEffect(() => {
     if (!fields.length) {
       axios
         .get(`${import.meta.env.VITE_API_BASE_URL}/field`)
         .then((response) => {
           setFields(response.data ? response.data : []);
-        });
+        })
+        .catch((error) => console.log(error));
     }
-  }, [fields.length]);
-  const [isChecked, setIsChecked] = useState(fields.map(() => false));
+  }, [fields?.length]);
 
-  console.log(isChecked);
-  console.log("Reportes", reports);
   return (
     <div>
       <Box
@@ -58,7 +79,17 @@ const CreateField = ({ messageToast }) => {
         paddingBottom={6}
       >
         <h1>Jhon Doe</h1>
-        <ModalField addField={addField} messageToast={messageToast} />
+        <ModalField
+          setFields={setFields}
+          fieldName={fieldName}
+          fieldId={fieldId}
+          setFieldName={setFieldName}
+          editOpen={onOpen}
+          edit={edit}
+          setEdit={setEdit}
+          addField={addField}
+          messageToast={messageToast}
+        />
       </Box>
       <Accordion borderTopWidth={0} borderBottomWidth={0} allowToggle>
         {fields.map((field, index) => (
@@ -97,16 +128,15 @@ const CreateField = ({ messageToast }) => {
                       `"text-icon accordion-icon"
                   "button-group button-group"
                   "corral corral"`,
-                      `"text-icon accordion-icon"
-                  "button-group button-group"
-                  "corral corral"`,
+                      `"text-icon  button-group accordion-icon"
+                      "corral corral corral"`,
                       `"text-icon  button-group accordion-icon"
                       "corral corral corral"`,
                     ]}
                     gridTemplateRows={[
                       "30px 1fr auto",
                       "30px 1fr auto",
-                      "30px 40px auto",
+                      "50px auto",
                       "50px auto",
                     ]}
                     gridTemplateColumns={[
@@ -124,7 +154,16 @@ const CreateField = ({ messageToast }) => {
                         {field.name}
                       </Text>
                       <ButtonGroup pl={2}>
-                        <button className="badge bg-info m-1">
+                        <button
+                          className="badge bg-info m-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEdit(true);
+                            setFieldName(field.name);
+                            setFieldId(field.id);
+                            onOpen();
+                          }}
+                        >
                           <EditIcon boxSize={3} />
                         </button>
                         <button className="badge bg-danger m-1">
@@ -173,21 +212,21 @@ const CreateField = ({ messageToast }) => {
                     >
                       <ButtonGroup
                         display={"flex"}
-                        justifyContent={"space-between"}
+                        justifyContent={[
+                          "space-between",
+                          "space-between",
+                          "center",
+                          "center",
+                        ]}
                       >
-                        <Button
-                          bg="#1a1a1a"
-                          color="white"
-                          size="sm"
-                          px={[2, 3]}
-                          fontSize={["8.4px", "10px"]}
-                          onClick={(e) => e.stopPropagation()}
-                          textTransform="uppercase"
-                          _hover={{ bg: "#1a1a1a", color: "white" }}
-                          // onClick={onOpen}
-                        >
-                          Crear Reporte
-                          <Switch
+                        <ModalReport
+                          messageToast={messageToast}
+                          field_id={field.id}
+                          measurements={measurements}
+                          pens_size={getSizeMeasurements(field.id)}
+                        />
+
+                        {/* <Switch
                             size="sm"
                             pl={3}
                             id="isChecked"
@@ -197,8 +236,8 @@ const CreateField = ({ messageToast }) => {
                               newIsChecked[index] = !isChecked[index];
                               setIsChecked(newIsChecked);
                             }}
-                          />
-                        </Button>
+                          /> */}
+
                         {/* <GridItem
                       justifySelf={["end", "end", "end", "auto"]}
                       paddingTop={[2]}
@@ -266,10 +305,11 @@ const CreateField = ({ messageToast }) => {
                             >
                               Generar Medición
                             </Link> */}
-                            <ModalReport
+                            <CorralReport
                               pen_id={pen.id}
                               // index={i}
-                              setReports={setReports}
+                              addMeasurements={addMeasurements}
+                              // setMeasurements={setMeasurements}
                             />
                           </Box>
                         </AccordionButton>
