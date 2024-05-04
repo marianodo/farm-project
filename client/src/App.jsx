@@ -36,11 +36,6 @@ function App() {
       <ToastContainer />
       <Routes>
         <Route path="/" element={<CreateField messageToast={messageToast} />} />
-        <Route
-          exact
-          path="/field"
-          element={<CreateField messageToast={messageToast} />}
-        />
         <Route exact path="/variable" element={<CreateVariable />} />
         <Route exact path="/pen" element={<CreatePen />} />
         <Route
@@ -50,7 +45,7 @@ function App() {
         />
         <Route
           exact
-          path="/newReport/:id"
+          path="/newReport/:fieldId/:reportId"
           element={<NewReport messageToast={messageToast} />}
         />
         <Route exact path="/measurement/:id" element={<CreateMeasurement />} />

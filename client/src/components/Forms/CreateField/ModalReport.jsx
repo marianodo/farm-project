@@ -39,7 +39,7 @@ const ModalReport = ({ messageToast, field_id }) => {
         console.log("Respuesta: ", response);
         messageToast(response.data.message, "success");
         setTimeout(() => {
-          window.location.href = `/newReport/${response.data.report.field_id}`;
+          window.location.href = `/newReport/${response.data.report.field_id}/${response.data.report.id}`;
         }, 1200);
       })
       .catch((error) => {
