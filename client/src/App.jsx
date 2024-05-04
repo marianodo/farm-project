@@ -50,7 +50,7 @@ function App() {
         />
         <Route
           exact
-          path="/newReport/:field/:id"
+          path="/newReport/:id"
           element={<NewReport messageToast={messageToast} />}
         />
         <Route exact path="/measurement/:id" element={<CreateMeasurement />} />

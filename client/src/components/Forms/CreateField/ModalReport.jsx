@@ -33,13 +33,17 @@ const ModalReport = ({ messageToast, field_id }) => {
     //   measurements,
     // };
     axios
-      .post(`${import.meta.env.VITE_API_BASE_URL}/report`)
+      .post(`${import.meta.env.VITE_API_BASE_URL}/report`, report)
       .then((response) => {
         onClose();
+        console.log("Respuesta: ", response);
         messageToast(response.data.message, "success");
+        setTimeout(() => {
+          window.location.href = `/newReport/${response.data.report.field_id}`;
+        }, 1200);
       })
       .catch((error) => {
-        messageToast(error.response.data.error);
+        messageToast(error.response.data.error, "error");
       });
   };
 

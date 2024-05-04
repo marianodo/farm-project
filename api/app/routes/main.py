@@ -141,16 +141,17 @@ def manage_pen():
             error_message = str(e)
             return jsonify({'error': error_message}), 500
     if request.method == 'GET':
-        variables = Variable.query.all()
-        serialized_variables = [variable.to_dict(
-            only=('id', 'name', 'type')) for variable in variables]
-        fields = Field.query.all()
-        serialized_fields = [field.to_dict(
-            only=('id', 'name')) for field in fields]
+        # Verificar si se proporcionó el parámetro fieldId en la solicitud
+        field_id = request.args.get('fieldId')
+        if field_id:
+            # Si se proporcionó el parámetro, filtrar solo los corrales que coincidan con el fieldId
+            pens = Pen.query.filter(Pen.field_id == field_id).all()
+            serialized_pens = [pen.to_dict(
+                rules=('-field', '-variable')) for pen in pens]
+            return jsonify(serialized_pens)
         pens = Pen.query.all()
-        serialized_pens = [pen.to_dict(
-            only=('id', 'name')) for pen in pens]
-        return jsonify({'pens': serialized_pens, 'variables': serialized_variables, 'fields': serialized_fields})
+        serialized_pens = [pen.to_dict() for pen in pens]
+        return jsonify(serialized_pens)
 
 
 @main_bp.route('/report', methods=['GET', 'POST', 'DELETE'])
