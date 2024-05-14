@@ -210,8 +210,7 @@ def manage_report():
                 if report.measurement.count() == 0:
                     db.session.delete(report)
                     db.session.commit()
-                    print(f'Reporte con ID {
-                          report.id} eliminado correctamente.')
+                    print(f'Reporte con ID {report.id} eliminado correctamente.')
             return jsonify({'message': 'Informes sin mediciones asociadas eliminados correctamente.'}), 400
         except Exception as e:
             db.session.rollback()
