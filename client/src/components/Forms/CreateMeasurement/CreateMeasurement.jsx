@@ -29,15 +29,12 @@ const CreateMeasurement = () => {
   const params = useParams();
   const [attributes, setAttributes] = useState([]);
   const [errors, setErrors] = useState({});
-  const [cowName, setCowName] = useState("");
   const [data, setData] = useState({
     cow_name: "",
     pen_id: "",
     measurements: {},
   });
-  const [values, setValues] = useState([]);
   const handleChange = (pen_variable_id, value, parameters, type) => {
-    console.log(value);
     setData({
       ...data,
       measurements: {
@@ -69,31 +66,7 @@ const CreateMeasurement = () => {
       cow_name: e.target.value,
     });
   };
-  /* 
- necesito enviar un objeto parecido a este:
 
- [
-  {
-    cow_name: "vaca02" -esto es opcional.
-    pen_variable_id: 1,
-    value: '200',
-    pen_id: 1 lo saco de params.
-  },
-  {
-    cow_name: "vaca03" -esto es opcional.
-    pen_variable_id: 2,
-    value: 'true',
-    pen_id: 1 lo saco de params.
-  },
-  {
-    cow_name: "vaca04" -esto es opcional.
-    pen_variable_id: 3,
-    value: 'Alto',
-    pen_id: 1 lo saco de params.
-  }
-]
- 
- */
   const validationNumber = (pen_variable_id, value, parameters) => {
     if (
       Number(value) % parameters.granularity !== 0 ||
@@ -116,7 +89,6 @@ const CreateMeasurement = () => {
   };
   const validationBoolean = (pen_variable_id, value, parameters) => {
     if (value !== "true" && value !== "false") {
-      console.log("entre al if");
       setErrors({
         ...errors,
         [pen_variable_id]: {
@@ -124,9 +96,7 @@ const CreateMeasurement = () => {
         },
       });
     } else {
-      console.log("entre al else");
       if (errors[pen_variable_id]) {
-        console.log("entre al if del else");
         let newErrors = { ...errors };
         delete newErrors[pen_variable_id];
         setErrors(newErrors);
@@ -152,7 +122,6 @@ const CreateMeasurement = () => {
     }
   };
 
-  //nombre de la vaca o id(opcional)
   useEffect(() => {
     let defaultValues = {};
     axios
@@ -189,7 +158,6 @@ const CreateMeasurement = () => {
     });
     return emptyErrors;
   }
-  // console.log(values);
 
   return (
     <div>
@@ -220,7 +188,6 @@ const CreateMeasurement = () => {
                   type="number"
                   maxW="100px"
                   mr="2rem"
-                  // defaultValue={0}
                   name={prop.id}
                   value={data.measurements[prop.id]}
                   onChange={(value) =>
@@ -321,13 +288,12 @@ const CreateMeasurement = () => {
               <RadioGroup
                 defaultValue=""
                 onChange={(value) => {
-                  console.log(value),
-                    handleChange(
-                      prop.id,
-                      value,
-                      prop.custom_parameters,
-                      prop.variable.type
-                    );
+                  handleChange(
+                    prop.id,
+                    value,
+                    prop.custom_parameters,
+                    prop.variable.type
+                  );
                 }}
               >
                 <HStack spacing="1rem">
@@ -347,7 +313,6 @@ const CreateMeasurement = () => {
           )}
         </Box>
       ))}
-      {console.log(Object.values(validErrors()))}
       <button
         onClick={onSubmit}
         disabled={

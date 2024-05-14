@@ -2,6 +2,8 @@ import "react-toastify/dist/ReactToastify.css";
 
 import {
   Button,
+  Checkbox,
+  CheckboxGroup,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -16,6 +18,7 @@ import {
   ModalOverlay,
   Radio,
   RadioGroup,
+  Stack,
   Tooltip,
   Wrap,
   useDisclosure,
@@ -25,11 +28,12 @@ import { ToastContainer } from "react-toastify";
 import axios from "axios";
 import { useState } from "react";
 
-const NewAtributte = ({ messageToast, addAttribute }) => {
+const NewAtributte = ({ messageToast, addAttribute, typeObjects }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [attribute, setAttribute] = useState({
     name: "",
     type: "number",
+    typeOfObjectId: [],
     parameters: {
       granularity: 1,
       value: {
@@ -53,7 +57,6 @@ const NewAtributte = ({ messageToast, addAttribute }) => {
 
   const postAttribute = () => {
     let body = attribute;
-    //el id no deberia existir y se tiene que hacer el axios al back con la respuesta ejecutar el addAttribute
     if (attribute.type === "number") {
       body = {
         ...attribute,
@@ -75,6 +78,18 @@ const NewAtributte = ({ messageToast, addAttribute }) => {
       name: e.target.value.toUpperCase(),
     });
   };
+
+  const handleRadioType = (value) => {
+    let types = [];
+    value.map((type) => {
+      types.push(typeObjects[type]);
+    });
+    setAttribute({
+      ...attribute,
+      typeOfObjectId: types,
+    });
+  };
+
   const handleRadio = (value) => {
     setAttribute({
       ...attribute,
@@ -109,12 +124,13 @@ const NewAtributte = ({ messageToast, addAttribute }) => {
     setAttribute({
       name: "",
       type: "number",
+      typeOfObjectId: [],
       parameters: {
         value: {
           min: 1,
-          max: 1000,
-          optimo_min: 100,
-          optimo_max: 200,
+          max: 10,
+          optimo_min: 4,
+          optimo_max: 6,
         },
       },
     });
@@ -179,14 +195,15 @@ const NewAtributte = ({ messageToast, addAttribute }) => {
           setEnumItems([]);
           onClose();
         }}
+        scrollBehavior="inside"
       >
         <ModalOverlay />
         <ModalContent marginX={6}>
-          <ModalHeader>Nuevo atributo</ModalHeader>
+          <ModalHeader>Nueva variable</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
             <FormControl>
-              <FormLabel>Nombre del atributo</FormLabel>
+              <FormLabel>Nombre de la variable</FormLabel>
               <Input
                 onChange={handleName}
                 value={attribute.name}
@@ -196,7 +213,27 @@ const NewAtributte = ({ messageToast, addAttribute }) => {
               />
             </FormControl>
             <FormControl mt={4} as="fieldset">
-              <FormLabel as="legend">Tipo</FormLabel>
+              {Object.keys(typeObjects).length > 0 && (
+                <>
+                  <FormLabel as="legend">Tipo de objeto</FormLabel>
+                  <CheckboxGroup colorScheme="blue" onChange={handleRadioType}>
+                    <Stack
+                      paddingBottom={2}
+                      spacing={[1, 5]}
+                      direction={["column", "row"]}
+                    >
+                      {Object.keys(typeObjects).map((type, i) => (
+                        <>
+                          <Checkbox key={i} value={type}>
+                            {type}
+                          </Checkbox>
+                        </>
+                      ))}
+                    </Stack>
+                  </CheckboxGroup>
+                </>
+              )}
+              <FormLabel as="legend">Tipo de variable</FormLabel>
               <RadioGroup defaultValue="number" onChange={handleRadio}>
                 <HStack spacing="1rem">
                   <Wrap>

@@ -1,4 +1,4 @@
-import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
+import { AddIcon, DeleteIcon, TriangleDownIcon } from "@chakra-ui/icons";
 import {
   Box,
   FormControl,
@@ -10,19 +10,20 @@ import {
   Wrap,
   WrapItem,
 } from "@chakra-ui/react";
-import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import EditAttribute from "../EditAttribute/EditAttribute";
-import { Navigate } from "react-router-dom";
 import NewAtributte from "../NewAttribute/NewAttribute";
 import axios from "axios";
 
 const NewPen = ({ messageToast }) => {
+  const navigate = useNavigate();
   const params = useParams();
   const [attributes, setAttributes] = useState([]);
   const [pens, setPens] = useState([]);
-  const [redirect, setRedirect] = useState(false);
+
+  const [typeObjects, setTypeObjects] = useState({});
   const [data, setData] = useState({
     field_id: parseInt(params.id),
     name: "",
@@ -49,7 +50,6 @@ const NewPen = ({ messageToast }) => {
       .post(`${import.meta.env.VITE_API_BASE_URL}/pen`, body)
       .then((response) => {
         messageToast(response.data.message, "success");
-        // setRedirect(true);
         addNewPen(data.name);
         resetStates();
       })
@@ -107,10 +107,20 @@ const NewPen = ({ messageToast }) => {
         setPens(response.data.pens);
       })
       .catch((error) => console.log(error));
-  }, [pens.length, params.id]);
+    if (Object.keys(typeObjects).length === 0) {
+      let types = {};
+      axios
+        .get(`${import.meta.env.VITE_API_BASE_URL}/typeofobjects`)
+        .then((response) => {
+          response.data.forEach((object) => {
+            types[object.name] = object.id;
+          });
+          setTypeObjects(types);
+        })
+        .catch((error) => console.log(error));
+    }
+  }, [pens.length, params.id, typeObjects.length]);
 
-  console.log("ATRIBUTOS", attributes);
-  console.log("pens", pens);
   function editAttribute(attribute) {
     setData({
       ...data,
@@ -123,7 +133,6 @@ const NewPen = ({ messageToast }) => {
     });
   }
 
-  if (redirect) return <Navigate to="/field" />;
   return (
     <div>
       <h2 className="text-center">{params.field}</h2>
@@ -160,30 +169,47 @@ const NewPen = ({ messageToast }) => {
         <div className="card-header ">Atributos seleccionados </div>
         <div className=" d-flex flex-wrap">
           {data.variables.map((attribute, i) => (
-            <div
+            <Box
               key={`${attribute.name}-${i}`}
-              className={"badge bg-primary m-2  d-flex "}
+              display={"flex"}
+              backgroundColor={"#1A1A1A"}
+              margin={1}
+              p={1}
+              color={"white"}
+              borderRadius={4}
             >
               <Tooltip
                 label={JSON.stringify(attribute.default_parameters)}
                 placement="top"
               >
-                <span className={"m-1 text-uppercase align-content-center"}>
+                <Text
+                  as="span"
+                  fontSize={7}
+                  fontWeight={400}
+                  alignSelf={"center"}
+                  alignItems={"center"}
+                  paddingX={1}
+                >
                   {attribute.name}
-                </span>
+                </Text>
               </Tooltip>
               <EditAttribute
                 messageToast={messageToast}
                 attribute={attribute}
                 changeAttribute={editAttribute}
               />
-              <button
-                className="badge bg-danger m-1"
+              <DeleteIcon
+                cursor={"pointer"}
+                backgroundColor={"red"}
+                fontSize={24}
+                paddingX={"0.2rem"}
+                paddingY={"0.12rem"}
+                marginY={1}
+                maxWidth={"26px"}
+                height={"18px"}
                 onClick={() => handleAttribute(attribute.id)}
-              >
-                <DeleteIcon boxSize={4} />
-              </button>
-            </div>
+              />
+            </Box>
           ))}
         </div>
       </div>
@@ -193,30 +219,71 @@ const NewPen = ({ messageToast }) => {
           <NewAtributte
             messageToast={messageToast}
             addAttribute={addNewAttribute}
+            typeObjects={typeObjects}
           />
         </div>
         <div className=" d-flex flex-wrap">
           {attributes.map((attribute, i) => {
             let inUse = attributeInUse(attribute.id);
             return (
-              <div key={`${attribute.name}-${i}`} className="my-2 m-2">
-                <span
-                  className={
-                    inUse
-                      ? "badge bg-secondary text-uppercase p-2 "
-                      : "badge text-uppercase bg-dark p-2"
-                  }
-                >
-                  {attribute.name}
-                  {!inUse && (
-                    <button
-                      size="xs"
-                      onClick={() => handleAttribute(attribute.id)}
+              <div key={`${attribute.name}-${i}`} className="my-1 m-1">
+                <Box display={"flex"} flexDirection={"column"} gap={1}>
+                  <Box
+                    display={"flex"}
+                    className={
+                      inUse
+                        ? "badge bg-secondary text-uppercase p-1 "
+                        : "badge text-uppercase bg-dark p-1"
+                    }
+                    justifyContent={"center"}
+                  >
+                    <Text
+                      as="span"
+                      fontSize={8}
+                      alignSelf={"center"}
+                      alignItems={"center"}
+                      padding={1}
                     >
-                      <AddIcon marginLeft={2} />
-                    </button>
-                  )}
-                </span>
+                      {attribute.name}
+                    </Text>
+
+                    {!inUse && (
+                      <AddIcon
+                        cursor={"pointer"}
+                        onClick={() => handleAttribute(attribute.id)}
+                        fontSize={10}
+                        marginRight={1}
+                        marginLeft={2}
+                        alignSelf={"center"}
+                      />
+                    )}
+                  </Box>
+                  <Box
+                    display={"flex"}
+                    justifyContent={"center"}
+                    alignContent={"center"}
+                    flexDirection={"column"}
+                  >
+                    <TriangleDownIcon
+                      color={inUse ? "#fff" : "#343A40"}
+                      boxSize={2}
+                      fontSize={2}
+                      marginBottom={1}
+                      alignSelf={"center"}
+                    />
+                    <Text
+                      as="sub"
+                      color={inUse ? "#fff" : "#343A40"}
+                      alignSelf={"center"}
+                      fontSize={8}
+                      fontWeight={800}
+                      paddingBottom={2}
+                      textTransform={"uppercase"}
+                    >
+                      {attribute?.type_of_object?.name}
+                    </Text>
+                  </Box>
+                </Box>
               </div>
             );
           })}
@@ -225,12 +292,12 @@ const NewPen = ({ messageToast }) => {
       <button onClick={onSubmit} className="btn btn-primary btn-sm">
         Crear corral
       </button>
-      <Link
-        to="/field"
+      <button
+        onClick={() => navigate(-1)}
         className="btn btn-secondary btn-sm align-content-center mx-2"
       >
         Volver
-      </Link>
+      </button>
     </div>
   );
 };

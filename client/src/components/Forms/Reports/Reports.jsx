@@ -3,28 +3,29 @@ import {
   AccordionButton,
   AccordionItem,
   Box,
+  Button,
   Text,
 } from "@chakra-ui/react";
-import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { DeleteIcon, ViewIcon } from "@chakra-ui/icons";
+import { Link, useParams } from "react-router-dom";
 
-import ModalMeasurements from "../ModalMeasurements/ModalMeasurements";
 import axios from "axios";
 import { useEffect } from "react";
 import { useState } from "react";
 
-const NewReport = ({ messageToast }) => {
-  const navigate = useNavigate();
-  const [pens, setPens] = useState([]);
+const Reports = ({ messageToast }) => {
+  const [reports, setReports] = useState([]);
   const params = useParams();
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/pen?fieldId=${params.fieldId}`)
+      .get(`${import.meta.env.VITE_API_BASE_URL}/report?fieldId=${1}`)
       .then((response) => {
-        setPens(response.data);
-      });
+        setReports(response.data);
+        if (response.data.message)
+          messageToast(response.data.message, "success");
+      })
+      .catch((error) => messageToast(error.response.data.error));
   }, []);
-
   return (
     <Box>
       <Box display={"flex"} flexDirection={"column"}>
@@ -34,7 +35,7 @@ const NewReport = ({ messageToast }) => {
           fontWeight={500}
           textAlign={"center"}
         >
-          Campo: {pens[0]?.field?.name}
+          {/* Campo: {reports[0]?.field?.name} */}
         </Text>
         <Text
           as="b"
@@ -42,7 +43,7 @@ const NewReport = ({ messageToast }) => {
           fontWeight={500}
           textAlign={"center"}
         >
-          Reporte: {params.reportId}
+          {/* Reporte: {params.reportId} */}
         </Text>
       </Box>
       <Box
@@ -55,13 +56,13 @@ const NewReport = ({ messageToast }) => {
         <Text
           padding={1}
           as="mark"
-          background="#2B6CB0"
+          background="#FFC300"
           color="white"
           fontWeight={500}
           textTransform="uppercase"
           fontSize={["15px", "15px"]}
         >
-          Corrales
+          Reportes
         </Text>
         <Text
           padding={1}
@@ -84,14 +85,14 @@ const NewReport = ({ messageToast }) => {
               opacity: "1",
               border: "none",
               zIndex: 2,
-              width: "4.23rem",
-              marginLeft: "-3.6px",
+              width: "4.26rem",
+              marginLeft: "-3.9px",
             }}
           />
-          <Link onClick={() => navigate(-1)}>Volver</Link>
+          <Link to={"/"}>Volver</Link>
         </Text>
         <hr
-          color="#2B6CB0"
+          color="#FFC300"
           width="100%"
           style={{
             height: "3px",
@@ -106,7 +107,7 @@ const NewReport = ({ messageToast }) => {
       <Box marginTop={3} style={{ height: "calc(100vh - 18rem)" }}>
         <Box maxHeight={"100%"} overflowY={"auto"}>
           <Accordion borderTopWidth={0} borderBottomWidth={0} allowToggle>
-            {pens.map((pen, i) => (
+            {reports?.map((report, i) => (
               <>
                 <AccordionItem
                   border={"1px solid black"}
@@ -116,27 +117,42 @@ const NewReport = ({ messageToast }) => {
                   key={i}
                 >
                   <Box display={"flex"} flexDirection={"column"}>
-                    <AccordionButton>
-                      <Box flex="1" textAlign="left">
-                        <Box display={"flex"} gap={1}>
-                          <Text as="b" marginRight={4}>
-                            {pen.name}
-                          </Text>
-                          <button className="badge bg-info m-1">
-                            <EditIcon boxSize={3} />
+                    <AccordionButton
+                      display={"flex"}
+                      flexWrap={"wrap"}
+                      justifyContent={"space-between"}
+                    >
+                      <Box>
+                        <Text as="b" marginRight={4}>
+                          {report.name ? report.name : "Reporte: " + report.id}
+                        </Text>
+                        <Link to={`/reportDetail/${report.id} `}>
+                          <button
+                            className="badge m-1"
+                            style={{ background: "#666666", color: "white" }}
+                          >
+                            <ViewIcon boxSize={3} />
                           </button>
-                          <button className="badge bg-danger m-1">
-                            <DeleteIcon boxSize={3} />
-                          </button>
-                        </Box>
+                        </Link>
+                        <button className="badge bg-danger m-1">
+                          <DeleteIcon boxSize={3} />
+                        </button>
                       </Box>
-                      <Box marginLeft={4}>
-                        <ModalMeasurements
-                          messageToast={messageToast}
-                          name={pen.name}
-                          report_id={params.reportId}
-                          pen_id={pen.id}
-                        />
+                      <Box padding={0} margin={0}>
+                        <Button
+                          as={Link}
+                          to={`/reportMeasurement/${params.fieldId}/${report.id}`}
+                          backgroundColor="#1A1A1A"
+                          color={"#fff"}
+                          size="xs"
+                          cursor={"pointer"}
+                          _hover={{
+                            backgroundColor: "white",
+                            color: "#1a1a1a",
+                          }}
+                        >
+                          Crear Medicion
+                        </Button>
                       </Box>
                     </AccordionButton>
                   </Box>
@@ -150,4 +166,4 @@ const NewReport = ({ messageToast }) => {
   );
 };
 
-export default NewReport;
+export default Reports;

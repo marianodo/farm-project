@@ -14,9 +14,9 @@ import {
   ModalOverlay,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
 
 import axios from "axios";
+import { useState } from "react";
 
 const ModalReport = ({ messageToast, field_id }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -28,18 +28,13 @@ const ModalReport = ({ messageToast, field_id }) => {
   const [error, setError] = useState("");
 
   const onSubmit = () => {
-    // let data = {
-    //   ...report,
-    //   measurements,
-    // };
     axios
       .post(`${import.meta.env.VITE_API_BASE_URL}/report`, report)
       .then((response) => {
-        onClose();
-        console.log("Respuesta: ", response);
         messageToast(response.data.message, "success");
+        onClose();
         setTimeout(() => {
-          window.location.href = `/newReport/${response.data.report.field_id}/${response.data.report.id}`;
+          window.location.href = `/reportMeasurement/${report.field_id}/${response.data.report.id}`;
         }, 1200);
       })
       .catch((error) => {
@@ -84,28 +79,22 @@ const ModalReport = ({ messageToast, field_id }) => {
               <FormLabel>Nombre:</FormLabel>
               <Input
                 placeholder={`Ingrese un nombre - (Opcional)`}
-                //   value={value[]} // Asignamos el valor del input
-                onChange={(e) => setReport({ ...report, name: e.target.value })} // Asignamos el evento onChange
+                onChange={(e) => setReport({ ...report, name: e.target.value })}
               />
             </FormControl>
             <FormControl mt={4}>
               <FormLabel>Comentario:</FormLabel>
               <Input
                 placeholder={`Ingrese un comentario - (Opcional)`}
-                //   value={value[]} // Asignamos el valor del input
                 onChange={(e) =>
                   setReport({ ...report, comment: e.target.value })
-                } // Asignamos el evento onChange
+                }
               />
             </FormControl>
           </ModalBody>
           <ModalFooter>
             <ButtonGroup spacing={2}>
-              <Button
-                // isDisabled={!Object.keys(measurements).length}
-                variant="ghost"
-                onClick={onSubmit}
-              >
+              <Button variant="ghost" onClick={onSubmit}>
                 Crear
               </Button>
               <Button colorScheme="blue" mr={3} onClick={onClose}>

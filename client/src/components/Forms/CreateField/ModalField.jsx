@@ -14,10 +14,9 @@ import {
   ModalOverlay,
   useDisclosure,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
 
-import { ToastContainer } from "react-toastify";
 import axios from "axios";
+import { useState } from "react";
 
 const ModalField = ({
   setFields,
@@ -75,7 +74,7 @@ const ModalField = ({
         });
     }
   };
-  console.log(edit);
+
   return (
     <>
       <Button
@@ -158,30 +157,24 @@ const ModalField = ({
                   color="white"
                   mr={3}
                   _hover={{ bg: "#1a1a1a", color: "white" }}
-                  onClick={
-                    (console.log(fieldName),
-                    async () => {
-                      try {
-                        const response = await axios.put(
-                          `${import.meta.env.VITE_API_BASE_URL}/${fieldId}`,
-                          { fieldName: fieldName }
-                        );
-                        const fields = (
-                          await axios.get(
-                            `${import.meta.env.VITE_API_BASE_URL}/field`
-                          )
-                        ).data;
-                        setFields(fields ? fields : []);
-                        messageToast(response.data.message, "success");
-                        setEdit(false);
-                      } catch (error) {
-                        messageToast(error.response.data.error);
-                      }
-                    })
-
-                    // .then(() => setEdit(false))
-                    // .catch((e) => console.log(e))
-                  }
+                  onClick={async () => {
+                    try {
+                      const response = await axios.put(
+                        `${import.meta.env.VITE_API_BASE_URL}/field/${fieldId}`,
+                        { fieldName: fieldName }
+                      );
+                      const fields = (
+                        await axios.get(
+                          `${import.meta.env.VITE_API_BASE_URL}/field`
+                        )
+                      ).data;
+                      setFields(fields ? fields : []);
+                      messageToast(response.data.message, "success");
+                      setEdit(false);
+                    } catch (error) {
+                      messageToast(error.response.data.error);
+                    }
+                  }}
                 >
                   Guardar
                 </Button>

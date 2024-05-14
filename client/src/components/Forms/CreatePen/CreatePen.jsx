@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+
+import axios from "axios";
 
 const CreatePen = () => {
   const [info, setInfo] = useState([]);
@@ -13,7 +14,6 @@ const CreatePen = () => {
           `${import.meta.env.VITE_API_BASE_URL}/pen`
         );
         setInfo(response.data);
-        // if (response.data.message) alert(response.data.message);
       } catch (error) {
         console.log(error);
       }
@@ -88,7 +88,7 @@ const CreatePen = () => {
       <select
         id="fieldId"
         name="field_id"
-        defaultValue={'default'}
+        defaultValue={"default"}
         onChange={handleChange}
         required
       >
