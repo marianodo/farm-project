@@ -66,6 +66,7 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
   };
 
   const handleTypeFilter = (event) => {
+    console.log("target name:", event.target.name);
     setEnumTypeSelect({});
     setNumberTypeSelect({});
     setBooleanTypeSelect({});
@@ -82,7 +83,7 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
       )
     );
   };
-  console.log(enumTypeSelect, numberTypeSelect, booleanTypeSelect);
+  console.log("datita:", data);
   const validationNumber = (pen_variable_id, value, parameters) => {
     if (
       Number(value) % parameters.granularity !== 0 ||
@@ -151,9 +152,8 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
       .then((response) => {
         messageToast(response.data.message, "success");
         setData({
-          type_of_object_id: "",
+          ...data,
           nameObject: "",
-          report_id: Number(report_id),
           measurements: {},
         });
         setEnumTypeSelect({});
@@ -273,7 +273,16 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
             />
             {/* {errorMessage && <p>{errorMessage}</p>} */}
           </ModalHeader>
-          <ModalCloseButton />
+          <ModalCloseButton
+            onClick={() => {
+              setData({
+                ...data,
+                type_of_object_id: "",
+                nameObject: "",
+                measurements: {},
+              });
+            }}
+          />
           <ModalBody pb={6}>
             {copyAttributes?.map((prop, i) => (
               <Box key={i} mb={2}>
@@ -450,6 +459,12 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
             <Button
               onClick={() => {
                 onClose();
+                setData({
+                  ...data,
+                  type_of_object_id: "",
+                  nameObject: "",
+                  measurements: {},
+                });
               }}
             >
               Cerrar
