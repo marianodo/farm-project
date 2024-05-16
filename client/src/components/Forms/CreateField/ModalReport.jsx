@@ -18,7 +18,7 @@ import {
 import axios from "axios";
 import { useState } from "react";
 
-const ModalReport = ({ messageToast, field_id }) => {
+const ModalReport = ({ messageToast, field_id, pens }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [report, setReport] = useState({
     name: "",
@@ -53,6 +53,7 @@ const ModalReport = ({ messageToast, field_id }) => {
         textTransform="uppercase"
         _hover={{ bg: "white", color: "#1a1a1a" }}
         onClick={onOpen}
+        isDisabled={!pens.length}
       >
         Crear Reporte
       </Button>

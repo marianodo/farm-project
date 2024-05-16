@@ -18,7 +18,9 @@ const Reports = ({ messageToast }) => {
   const params = useParams();
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/report?fieldId=${1}`)
+      .get(
+        `${import.meta.env.VITE_API_BASE_URL}/report?fieldId=${params.fieldId}`
+      )
       .then((response) => {
         setReports(response.data);
         if (response.data.message)
@@ -126,7 +128,9 @@ const Reports = ({ messageToast }) => {
                         <Text as="b" marginRight={4}>
                           {report.name ? report.name : "Reporte: " + report.id}
                         </Text>
-                        <Link to={`/reportDetail/${report.id} `}>
+                        <Link
+                          to={`/reportDetail/${params.fieldId}/${report.id} `}
+                        >
                           <button
                             className="badge m-1"
                             style={{ background: "#666666", color: "white" }}

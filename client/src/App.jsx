@@ -5,7 +5,6 @@ import { Route, Routes } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 
 import CreateField from "./components/Forms/CreateField/CreateField";
-import CreateMeasurement from "./components/Forms/CreateMeasurement/CreateMeasurement";
 import CreatePen from "./components/Forms/CreatePen/CreatePen";
 import NavBar from "./components/NavBar/NavBar";
 import NewPen from "./components/Forms/NewPen/NewPen";
@@ -52,10 +51,9 @@ function App() {
         />
         <Route
           exact
-          path="/reportDetail/:reportId"
+          path="/reportDetail/:fieldId/:reportId"
           element={<ReportDetail messageToast={messageToast} />}
         />
-        <Route exact path="/measurement/:id" element={<CreateMeasurement />} />
       </Routes>
     </div>
   );

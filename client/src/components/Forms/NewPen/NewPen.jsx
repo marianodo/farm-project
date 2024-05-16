@@ -169,46 +169,72 @@ const NewPen = ({ messageToast }) => {
         <div className="card-header ">Atributos seleccionados </div>
         <div className=" d-flex flex-wrap">
           {data.variables.map((attribute, i) => (
-            <Box
-              key={`${attribute.name}-${i}`}
-              display={"flex"}
-              backgroundColor={"#1A1A1A"}
-              margin={1}
-              p={1}
-              color={"white"}
-              borderRadius={4}
-            >
-              <Tooltip
-                label={JSON.stringify(attribute.default_parameters)}
-                placement="top"
+            <Box key={`${attribute.name}-${i}`}>
+              <Box
+                display={"flex"}
+                backgroundColor={"#1A1A1A"}
+                margin={1}
+                p={1}
+                color={"white"}
+                borderRadius={4}
               >
-                <Text
-                  as="span"
-                  fontSize={7}
-                  fontWeight={400}
-                  alignSelf={"center"}
-                  alignItems={"center"}
-                  paddingX={1}
+                <Tooltip
+                  label={JSON.stringify(attribute.default_parameters)}
+                  placement="top"
                 >
-                  {attribute.name}
+                  <Text
+                    as="span"
+                    fontSize={7}
+                    fontWeight={400}
+                    alignSelf={"center"}
+                    alignItems={"center"}
+                    paddingX={1}
+                  >
+                    {attribute.name}
+                  </Text>
+                </Tooltip>
+                <EditAttribute
+                  messageToast={messageToast}
+                  attribute={attribute}
+                  changeAttribute={editAttribute}
+                />
+                <DeleteIcon
+                  cursor={"pointer"}
+                  backgroundColor={"red"}
+                  fontSize={24}
+                  paddingX={"0.2rem"}
+                  paddingY={"0.12rem"}
+                  marginY={1}
+                  maxWidth={"26px"}
+                  height={"18px"}
+                  onClick={() => handleAttribute(attribute.id)}
+                />
+              </Box>
+              <Box
+                display={"flex"}
+                justifyContent={"center"}
+                alignContent={"center"}
+                flexDirection={"column"}
+              >
+                <TriangleDownIcon
+                  color={"#1A1A1A"}
+                  boxSize={2}
+                  fontSize={2}
+                  marginBottom={1}
+                  alignSelf={"center"}
+                />
+                <Text
+                  as="sub"
+                  color={"##1A1A1A"}
+                  alignSelf={"center"}
+                  fontSize={8}
+                  fontWeight={800}
+                  paddingBottom={2}
+                  textTransform={"uppercase"}
+                >
+                  {attribute?.type_of_object?.name}
                 </Text>
-              </Tooltip>
-              <EditAttribute
-                messageToast={messageToast}
-                attribute={attribute}
-                changeAttribute={editAttribute}
-              />
-              <DeleteIcon
-                cursor={"pointer"}
-                backgroundColor={"red"}
-                fontSize={24}
-                paddingX={"0.2rem"}
-                paddingY={"0.12rem"}
-                marginY={1}
-                maxWidth={"26px"}
-                height={"18px"}
-                onClick={() => handleAttribute(attribute.id)}
-              />
+              </Box>
             </Box>
           ))}
         </div>

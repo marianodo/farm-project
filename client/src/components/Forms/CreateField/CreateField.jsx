@@ -47,6 +47,10 @@ const CreateField = ({ messageToast }) => {
     }
   }, [fields?.length]);
 
+  {
+    console.log(fields);
+  }
+
   return (
     <div>
       <Box
@@ -119,7 +123,7 @@ const CreateField = ({ messageToast }) => {
                       "50px auto",
                     ]}
                     gridTemplateColumns={[
-                      "70% 30%",
+                      "90% 10%",
                       "70% 30%",
                       "1fr auto",
                       "auto 240px 40px",
@@ -128,56 +132,58 @@ const CreateField = ({ messageToast }) => {
                     justifyItems={"center"}
                     pb={0}
                   >
-                    <GridItem justifySelf={["left"]} pl="0" area={"text-icon"}>
-                      <Text as="b" marginRight={0}>
-                        {field.name}
-                      </Text>
-                      <ButtonGroup pl={[1, 2]} alignItems={"center"}>
-                        <button
-                          className="badge bg-info m-1"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEdit(true);
-                            setFieldName(field.name);
-                            setFieldId(field.id);
-                            onOpen();
-                          }}
-                        >
-                          <EditIcon boxSize={3} />
-                        </button>
-                        <button className="badge bg-danger m-1">
-                          <DeleteIcon
-                            boxSize={3}
-                            onClick={async (event) => {
-                              event.stopPropagation();
-                              await axios.delete(
-                                `${import.meta.env.VITE_API_BASE_URL}/field/${
-                                  field.id
-                                }`
-                              );
-                              const updatedFields = fields.filter(
-                                (f) => f.id !== field.id
-                              );
-                              setFields(updatedFields);
-                              alert("Campo eliminado");
+                    <GridItem justifySelf={["left"]} pr="0" area={"text-icon"}>
+                      <Box display={"flex"} gap={[2]}>
+                        <Text as="b" marginRight={0}>
+                          {field.name}
+                        </Text>
+                        <ButtonGroup pl={[0, 2]} alignItems={"center"}>
+                          <button
+                            className="badge bg-info m-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEdit(true);
+                              setFieldName(field.name);
+                              setFieldId(field.id);
+                              onOpen();
                             }}
-                          />
-                        </button>
-                        <Button
-                          as={Link}
-                          to={`/reports/${field.id}`}
-                          margin={0}
-                          padding={0}
-                          size={"xs"}
-                        >
-                          <Icon
-                            cursor={"pointer"}
-                            as={FcDocument}
-                            w={5}
-                            h={5}
-                          />
-                        </Button>
-                      </ButtonGroup>
+                          >
+                            <EditIcon boxSize={3} />
+                          </button>
+                          <button className="badge bg-danger m-1">
+                            <DeleteIcon
+                              boxSize={3}
+                              onClick={async (event) => {
+                                event.stopPropagation();
+                                await axios.delete(
+                                  `${import.meta.env.VITE_API_BASE_URL}/field/${
+                                    field.id
+                                  }`
+                                );
+                                const updatedFields = fields.filter(
+                                  (f) => f.id !== field.id
+                                );
+                                setFields(updatedFields);
+                                alert("Campo eliminado");
+                              }}
+                            />
+                          </button>
+                          <Button
+                            as={Link}
+                            to={`/reports/${field.id}`}
+                            margin={0}
+                            padding={0}
+                            size={"xs"}
+                          >
+                            <Icon
+                              cursor={"pointer"}
+                              as={FcDocument}
+                              w={5}
+                              h={5}
+                            />
+                          </Button>
+                        </ButtonGroup>
+                      </Box>
                     </GridItem>
                     <GridItem area={"accordion-icon"} justifySelf={["right"]}>
                       <AccordionIcon />
@@ -191,7 +197,9 @@ const CreateField = ({ messageToast }) => {
                         {field?.pens.map((e, i) => (
                           <WrapItem key={i}>
                             <Tooltip label="Corral">
-                              <Tag p>{e.name}</Tag>
+                              <Tag size={"sm"} fontSize={"11px"}>
+                                {e.name}
+                              </Tag>
                             </Tooltip>
                           </WrapItem>
                         ))}
@@ -214,6 +222,7 @@ const CreateField = ({ messageToast }) => {
                       >
                         <ModalReport
                           messageToast={messageToast}
+                          pens={field.pens}
                           field_id={field.id}
                         />
                         <Button
@@ -275,7 +284,10 @@ const CreateField = ({ messageToast }) => {
                               <Tooltip
                                 label={JSON.stringify(e.custom_parameters)}
                               >
-                                <Tag key={i}>{e.variable.name}</Tag>
+                                <Tag size={"sm"} fontSize={"11px"}>
+                                  {e.variable.name} -{" "}
+                                  {e.variable.type_of_object.name}
+                                </Tag>
                               </Tooltip>
                             </WrapItem>
                           ))}

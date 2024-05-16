@@ -67,6 +67,7 @@ const NewAtributte = ({ messageToast, addAttribute, typeObjects }) => {
       .post(`${import.meta.env.VITE_API_BASE_URL}/variable`, body)
       .then((response) => {
         addAttribute(response.data);
+        setEnumItems([]);
         onClose();
         messageToast(response.data.message, "success");
       })
@@ -325,9 +326,9 @@ const NewAtributte = ({ messageToast, addAttribute, typeObjects }) => {
                           hasArrow
                           bg="#1a1a1a"
                           placement="top"
+                          key={i}
                         >
                           <Button
-                            key={i}
                             className="m-1"
                             onClick={() => removeEnumItem(value)}
                           >
