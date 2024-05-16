@@ -49,7 +49,7 @@ const ReportDetail = ({ messageToast }) => {
           fontWeight={500}
           textAlign={"center"}
         >
-          {report.name ? report.name : "Reporte" + report.id}
+          {report?.name ? report?.name : "Reporte" + report?.id}
         </Text>
         <Text
           as="b"
@@ -123,7 +123,7 @@ const ReportDetail = ({ messageToast }) => {
         <Tabs size={"sm"} marginTop={5} isLazy>
           <Box maxHeight={"100%"} overflowX={"auto"} overflowY={"hidden"}>
             <TabList borderColor={"transparent"}>
-              {penNamesUnique.map((p, i) => (
+              {penNamesUnique?.map((p, i) => (
                 <Tab
                   fontSize={"11px"}
                   color={"#fff"}
@@ -149,7 +149,7 @@ const ReportDetail = ({ messageToast }) => {
           <Box marginTop={3} style={{ height: "calc(100vh - 18rem)" }}>
             <Box maxHeight={"100%"} overflowX={"hidden"} overflowY={"auto"}>
               <TabPanels>
-                {penNamesUnique.map((p, i) => (
+                {penNamesUnique?.map((p, i) => (
                   <TabPanel
                     paddingY={0}
                     paddingLeft={2}
@@ -175,15 +175,15 @@ const ReportDetail = ({ messageToast }) => {
                             >
                               <Box marginBottom={2} marginTop={2}>
                                 <Text as="b" fontSize={20}>
-                                  {report?.grouped_measurements[k][0].object
+                                  {report?.grouped_measurements[k][0]?.object
                                     ?.name
-                                    ? report?.grouped_measurements[k][0].object
-                                        ?.type_of_object.name +
+                                    ? report?.grouped_measurements[k][0]?.object
+                                        ?.type_of_object?.name +
                                       " - " +
-                                      report?.grouped_measurements[k][0].object
+                                      report?.grouped_measurements[k][0]?.object
                                         ?.name
-                                    : report?.grouped_measurements[k][0].object
-                                        ?.type_of_object.name}
+                                    : report?.grouped_measurements[k][0]?.object
+                                        ?.type_of_object?.name}
                                 </Text>
                               </Box>
                               <Accordion
@@ -191,62 +191,69 @@ const ReportDetail = ({ messageToast }) => {
                                 borderBottomWidth={0}
                                 allowToggle
                               >
-                                {report?.grouped_measurements[k].map((m, i) => (
-                                  <>
-                                    <AccordionItem
-                                      border={"1px solid black"}
-                                      borderBottom={"0px solid black"}
-                                      // paddingTop={[2, 3, 4]}
-                                      // paddingBottom={[2, 3, 4]}
-                                      key={i}
-                                    >
-                                      <Box
-                                        display={"flex"}
-                                        flexDirection={"column"}
+                                {report?.grouped_measurements[k]?.map(
+                                  (m, i) => (
+                                    <>
+                                      <AccordionItem
+                                        border={"1px solid black"}
+                                        borderBottom={"0px solid black"}
+                                        // paddingTop={[2, 3, 4]}
+                                        // paddingBottom={[2, 3, 4]}
+                                        key={i}
                                       >
-                                        <AccordionButton>
-                                          <Box flex="1" textAlign="left">
-                                            <Box
-                                              display={"flex"}
-                                              gap={1}
-                                              alignItems={"center"}
-                                            >
+                                        <Box
+                                          display={"flex"}
+                                          flexDirection={"column"}
+                                        >
+                                          <AccordionButton>
+                                            <Box flex="1" textAlign="left">
                                               <Box
                                                 display={"flex"}
-                                                flexDirection={"column"}
-                                                justifyContent={"center"}
                                                 gap={1}
+                                                alignItems={"center"}
                                               >
-                                                <Text
-                                                  as="b"
-                                                  marginRight={2}
-                                                  fontSize={13}
-                                                  textTransform={"uppercase"}
+                                                <Box
+                                                  display={"flex"}
+                                                  flexDirection={"column"}
+                                                  justifyContent={"center"}
+                                                  gap={1}
                                                 >
-                                                  {m.pen_variable.variable.name}
-                                                  :{" "}
-                                                  {m.value == "false"
-                                                    ? "FALSO"
-                                                    : m.value == "true"
-                                                    ? "VERDADERO"
-                                                    : m.value}
-                                                </Text>
-                                              </Box>
-                                              <Box marginLeft={0}>
-                                                <EditModalMeasurement
-                                                  messageToast={messageToast}
-                                                  pen_variable={m.pen_variable}
-                                                  valueM={m.value}
-                                                  id={m.id}
-                                                />
+                                                  <Text
+                                                    as="b"
+                                                    marginRight={2}
+                                                    fontSize={13}
+                                                    textTransform={"uppercase"}
+                                                  >
+                                                    {
+                                                      m?.pen_variable?.variable
+                                                        ?.name
+                                                    }
+                                                    :{" "}
+                                                    {m?.value == "false"
+                                                      ? "FALSO"
+                                                      : m?.value == "true"
+                                                      ? "VERDADERO"
+                                                      : m?.value}
+                                                  </Text>
+                                                </Box>
+                                                <Box marginLeft={0}>
+                                                  <EditModalMeasurement
+                                                    messageToast={messageToast}
+                                                    pen_variable={
+                                                      m?.pen_variable
+                                                    }
+                                                    valueM={m?.value}
+                                                    id={m?.id}
+                                                  />
+                                                </Box>
                                               </Box>
                                             </Box>
-                                          </Box>
-                                        </AccordionButton>
-                                      </Box>
-                                    </AccordionItem>
-                                  </>
-                                ))}
+                                          </AccordionButton>
+                                        </Box>
+                                      </AccordionItem>
+                                    </>
+                                  )
+                                )}
                               </Accordion>
                             </Box>
                           ))}
