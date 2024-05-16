@@ -37,14 +37,11 @@ class Pen(db.Model, SerializerMixin):
         if not (self.name and self.field_id):
             raise ValueError("Nombre y Field_id son requeridos")
         if not self.name or not self.name.strip() or len(self.name.strip()) < 3:
-            raise ValueError(
-                "El nombre del corral no puede estar vacío y debe tener una longitud mayor a dos")
+            raise ValueError("El nombre del corral no puede estar vacío y debe tener una longitud mayor a dos")
         if not isinstance(self.field_id, int) or self.field_id <= 0:
-            raise ValueError(
-                "El valor field_id debe ser un entero mayor a cero")
+            raise ValueError("El valor field_id debe ser un entero mayor a cero")
         if Pen.query.filter_by(name=self.name, field_id=self.field_id).count() > 0:
-            raise ValueError(f"Ya existe un corral con el nombre '{
-                             self.name}' en este Field.")
+            raise ValueError(f"Ya existe un corral con el nombre '{self.name}' en este Field.")
 
 # Variable
 
@@ -65,17 +62,13 @@ class Variable(db.Model, SerializerMixin):
 
     def validate(self):
         if self.type not in ('number', 'boolean', 'enum'):
-            raise ValueError(
-                "El valor de type debe ser uno de los siguientes: 'number', 'boolean', 'enum'")
+            raise ValueError("El valor de type debe ser uno de los siguientes: 'number', 'boolean', 'enum'")
         if not self.name or not self.name.strip() or len(self.name.strip()) < 3:
-            raise ValueError(
-                "El nombre de la variable no puede estar vacío y debe tener una longitud mayor a dos")
+            raise ValueError("El nombre de la variable no puede estar vacío y debe tener una longitud mayor a dos")
         if 'value' in self.default_parameters and not self.default_parameters['value']:
-            raise ValueError(
-                "Debes ingresar un valor para crear el atributo")
+            raise ValueError("Debes ingresar un valor para crear el atributo")
         if Variable.query.filter_by(name=self.name, type_of_object_id=self.type_of_object_id).count() > 0:
-            raise ValueError(f"Ya existe la variable '{
-                             self.name}' con ese tipo.")
+            raise ValueError(f"Ya existe la variable '{self.name}' con ese tipo.")
 
 # Tabla intermedia corral y variable
 
