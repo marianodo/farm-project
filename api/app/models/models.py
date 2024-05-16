@@ -43,8 +43,7 @@ class Pen(db.Model, SerializerMixin):
             raise ValueError(
                 "El valor field_id debe ser un entero mayor a cero")
         if Pen.query.filter_by(name=self.name, field_id=self.field_id).count() > 0:
-            raise ValueError(f"Ya existe un corral con el nombre '{
-                             self.name}' en este Field.")
+            raise ValueError(f"Ya existe un corral con el nombre '{self.name}' en este Field.")
 
 # Variable
 
@@ -73,8 +72,7 @@ class Variable(db.Model, SerializerMixin):
         if 'value' in self.default_parameters and not self.default_parameters['value']:
             raise ValueError("Debes ingresar un valor para crear el atributo")
         if Variable.query.filter_by(name=self.name, type_of_object_id=self.type_of_object_id).count() > 0:
-            raise ValueError(f"Ya existe la variable '{
-                             self.name}' con ese tipo.")
+            raise ValueError(f"Ya existe la variable '{self.name}' con ese tipo.")
 
 # Tabla intermedia corral y variable
 
