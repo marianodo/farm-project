@@ -18,16 +18,19 @@ const Reports = ({ messageToast }) => {
   const params = useParams();
   useEffect(() => {
     axios
-      .get(
-        `${import.meta.env.VITE_API_BASE_URL}/report?fieldId=${params.fieldId}`
-      )
+      .get(`${import.meta.env.VITE_API_BASE_URL}/report`)
       .then((response) => {
-        setReports(response.data);
+        const reportFilter = response.data.filter(
+          (report) => report.field_id == params.fieldId
+        );
+        console.log("report Filter:", reportFilter);
+        setReports(reportFilter);
         if (response.data.message)
           messageToast(response.data.message, "success");
       })
       .catch((error) => messageToast(error.response.data.error));
   }, []);
+  console.log(reports);
   return (
     <Box>
       <Box display={"flex"} flexDirection={"column"}>

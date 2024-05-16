@@ -21,7 +21,6 @@ import { useState } from "react";
 const ReportDetail = ({ messageToast }) => {
   const navigate = useNavigate();
   const params = useParams();
-  const [pensNames, setPensNames] = useState([]);
   const [report, setReport] = useState([]);
   useEffect(() => {
     axios
@@ -32,17 +31,14 @@ const ReportDetail = ({ messageToast }) => {
           messageToast(response.data.message, "success");
       })
       .catch((error) => messageToast(error.response.data.error));
-
-    axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/field/${params.fieldId}`)
-      .then((response) => {
-        const pensNames = response.data.pens.map((p) => p.name);
-        setPensNames(pensNames);
-        if (response.data.message)
-          messageToast(response.data.message, "success");
-      })
-      .catch((error) => messageToast(error.response.data.error));
-  }, []);
+  }, [messageToast, params.reportId]);
+  let penNamesUnique = [];
+  if (typeof report.grouped_measurements == "object") {
+    const penNames = Object.values(report.grouped_measurements).map(
+      (items) => items[0]?.pen_variable?.pen?.name
+    );
+    penNamesUnique.push(...new Set(penNames));
+  }
 
   return (
     <Box>
@@ -123,23 +119,27 @@ const ReportDetail = ({ messageToast }) => {
           }}
         />
       </Box>
-      {pensNames.length ? (
-        <Tabs size="sm" marginTop={5} isLazy>
+      {penNamesUnique.length ? (
+        <Tabs size={"sm"} marginTop={5} isLazy>
           <Box maxHeight={"100%"} overflowX={"auto"} overflowY={"hidden"}>
             <TabList borderColor={"transparent"}>
-              {pensNames.map((p, i) => (
+              {penNamesUnique.map((p, i) => (
                 <Tab
                   fontSize={"11px"}
+                  color={"#fff"}
+                  borderRadius={"5px 5px 0px 0px"}
+                  background={"rgba(0, 148, 136, 0.40)"}
                   key={i}
                   _selected={{
-                    background: "white",
+                    background: "#009588",
+                    borderRadius: "5px 5px 0px 0px",
                     opacity: "1",
-                    borderBottom: "0.1rem solid #2b6cb0",
-                    color: "#2b6cb0",
+                    borderBottom: "0.1rem solid #fff",
+                    color: "#fff",
                     cursor: "pointer",
                   }}
                   borderBottom={"0.1rem solid"}
-                  borderColor={"white"}
+                  borderColor={"#009588"}
                 >
                   {p}
                 </Tab>
@@ -149,7 +149,7 @@ const ReportDetail = ({ messageToast }) => {
           <Box marginTop={3} style={{ height: "calc(100vh - 18rem)" }}>
             <Box maxHeight={"100%"} overflowX={"hidden"} overflowY={"auto"}>
               <TabPanels>
-                {pensNames.map((p, i) => (
+                {penNamesUnique.map((p, i) => (
                   <TabPanel
                     paddingY={0}
                     paddingLeft={2}
@@ -159,13 +159,12 @@ const ReportDetail = ({ messageToast }) => {
                     <Box maxHeight={"100%"} overflowY={"auto"}>
                       {report?.grouped_measurements &&
                         Object.keys(report?.grouped_measurements)
-                          ?.filter(
-                            (m, index) =>
-                              report?.grouped_measurements[m][
-                                m - m
-                              ]?.pen_variable?.pen?.name
-                                .toLowerCase() // Convertir a minúsculas para buscar sin importar las mayúsculas
-                                .includes(p.toLowerCase()) // Buscar si el nombre contiene el filtro
+                          ?.filter((m) =>
+                            report?.grouped_measurements[m][
+                              m - m
+                            ]?.pen_variable?.pen?.name
+                              .toLowerCase()
+                              .includes(p.toLowerCase())
                           )
                           .map((k, i) => (
                             <Box
@@ -176,16 +175,16 @@ const ReportDetail = ({ messageToast }) => {
                             >
                               <Box marginBottom={2} marginTop={2}>
                                 <Text as="b" fontSize={20}>
-                                  {report?.grouped_measurements[k].map(
-                                    (e) => e?.object?.name
-                                  )}
+                                  {report?.grouped_measurements[k][0].object
+                                    ?.name
+                                    ? report?.grouped_measurements[k][0].object
+                                        ?.type_of_object.name +
+                                      " - " +
+                                      report?.grouped_measurements[k][0].object
+                                        ?.name
+                                    : report?.grouped_measurements[k][0].object
+                                        ?.type_of_object.name}
                                 </Text>
-                                {console.log(
-                                  "que pasa con M:",
-                                  report?.grouped_measurements[k],
-                                  "y",
-                                  i
-                                )}
                               </Box>
                               <Accordion
                                 borderTopWidth={0}
@@ -220,7 +219,7 @@ const ReportDetail = ({ messageToast }) => {
                                               >
                                                 <Text
                                                   as="b"
-                                                  marginRight={4}
+                                                  marginRight={2}
                                                   fontSize={13}
                                                   textTransform={"uppercase"}
                                                 >
@@ -233,16 +232,6 @@ const ReportDetail = ({ messageToast }) => {
                                                     : m.value}
                                                 </Text>
                                               </Box>
-                                              <button
-                                                className="badge m-1"
-                                                style={{
-                                                  background: "#666666",
-                                                  color: "white",
-                                                  height: "22.08px",
-                                                }}
-                                              >
-                                                <ViewIcon boxSize={3} />
-                                              </button>
                                               <Box marginLeft={0}>
                                                 <EditModalMeasurement
                                                   messageToast={messageToast}

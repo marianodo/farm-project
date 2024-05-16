@@ -40,9 +40,9 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
   const [attributes, setAttributes] = useState([]);
   const [copyAttributes, setCopyAttributes] = useState([]);
   const [typeObjects, setTypeObjects] = useState([]);
-  const [enumTypeSelect, setEnumTypeSelect] = useState("");
-  const [numberTypeSelect, setNumberTypeSelect] = useState("");
-  const [booleanTypeSelect, setBooleanTypeSelect] = useState("");
+  const [enumTypeSelect, setEnumTypeSelect] = useState({});
+  const [numberTypeSelect, setNumberTypeSelect] = useState({});
+  const [booleanTypeSelect, setBooleanTypeSelect] = useState({});
   const [errors, setErrors] = useState({});
   const [data, setData] = useState({
     type_of_object_id: "",
@@ -50,7 +50,7 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
     report_id: Number(report_id),
     measurements: {},
   });
-
+  console.log("data measurements:", data.measurements);
   const enableButton = () => {
     const measurements = Object.entries(data.measurements).some(
       ([key, value]) => value !== ""
@@ -66,9 +66,9 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
   };
 
   const handleTypeFilter = (event) => {
-    setEnumTypeSelect("");
-    setNumberTypeSelect("");
-    setBooleanTypeSelect("");
+    setEnumTypeSelect({});
+    setNumberTypeSelect({});
+    setBooleanTypeSelect({});
     setData({
       ...data,
       type_of_object_id: Number(event.target.name),
@@ -82,7 +82,7 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
       )
     );
   };
-
+  console.log(enumTypeSelect, numberTypeSelect, booleanTypeSelect);
   const validationNumber = (pen_variable_id, value, parameters) => {
     if (
       Number(value) % parameters.granularity !== 0 ||
@@ -156,17 +156,20 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
           report_id: Number(report_id),
           measurements: {},
         });
-        setEnumTypeSelect("");
-        setNumberTypeSelect("");
-        setBooleanTypeSelect("");
+        setEnumTypeSelect({});
+        setNumberTypeSelect({});
+        setBooleanTypeSelect({});
       })
       .catch((error) => console.log(error));
   };
 
   const handleChange = (pen_variable_id, value, parameters, type) => {
-    if (type === "enum") setEnumTypeSelect(value);
-    if (type === "number") setNumberTypeSelect(value);
-    if (type === "boolean") setBooleanTypeSelect(value);
+    if (type === "enum")
+      setEnumTypeSelect({ ...enumTypeSelect, [pen_variable_id]: value });
+    if (type === "number")
+      setNumberTypeSelect({ ...numberTypeSelect, [pen_variable_id]: value });
+    if (type === "boolean")
+      setBooleanTypeSelect({ ...booleanTypeSelect, [pen_variable_id]: value });
     setData({
       ...data,
       measurements: {
@@ -242,16 +245,21 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
             <RadioGroup marginTop={2} defaultValue={""}>
               <Stack direction="row">
                 <Wrap>
-                  {typeObjects?.map((element, i) => (
-                    <Radio
-                      name={element.id}
-                      onChange={handleTypeFilter}
-                      key={i}
-                      value={element.name}
-                    >
-                      {element.name}
-                    </Radio>
-                  ))}
+                  {typeObjects?.map((types, i) =>
+                    !attributes.filter(
+                      (element) =>
+                        element.variable.type_of_object.name === types.name
+                    ).length ? null : (
+                      <Radio
+                        name={types.id}
+                        onChange={handleTypeFilter}
+                        key={i}
+                        value={types.name}
+                      >
+                        {types.name}
+                      </Radio>
+                    )
+                  )}
                 </Wrap>
               </Stack>
             </RadioGroup>
@@ -320,7 +328,11 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
                         flex="1"
                         defaultValue={prop.custom_parameters.value.min}
                         focusThumbOnChange={false}
-                        value={numberTypeSelect}
+                        value={
+                          numberTypeSelect[prop.id]
+                            ? numberTypeSelect[prop.id]
+                            : ""
+                        }
                         onChange={(value) =>
                           handleChange(
                             prop.id,
@@ -356,9 +368,10 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
                   <FormControl isInvalid={!!errors[prop.id]}>
                     <FormLabel>{prop.variable.name}:</FormLabel>
                     <RadioGroup
-                      value={enumTypeSelect}
-                      isChecked={true}
-                      defaultValue=""
+                      value={
+                        enumTypeSelect[prop.id] ? enumTypeSelect[prop.id] : ""
+                      }
+                      // defaultValue=""
                       onChange={(value) =>
                         handleChange(
                           prop.id,
@@ -390,8 +403,12 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
                   <FormControl isInvalid={!!errors[prop.id]}>
                     <FormLabel>{prop.variable.name}:</FormLabel>
                     <RadioGroup
-                      defaultValue=""
-                      value={booleanTypeSelect}
+                      // defaultValue=
+                      value={
+                        booleanTypeSelect[prop.id]
+                          ? booleanTypeSelect[prop.id]
+                          : ""
+                      }
                       onChange={(value) => {
                         handleChange(
                           prop.id,
@@ -435,7 +452,7 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
                 onClose();
               }}
             >
-              Cancelar
+              Cerrar
             </Button>
           </ModalFooter>
         </ModalContent>

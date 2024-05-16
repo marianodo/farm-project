@@ -183,10 +183,11 @@ def manage_report():
         data = request.json
         name = data.get('name')
         comment = data.get('comment')
+        field_id = data.get('field_id')
         date = datetime.now()
         try:
             new_report = Report(name=name, comment=comment,
-                                date=date)
+                                date=date, field_id=field_id)
             print(new_report)
             db.session.add(new_report)
             db.session.commit()
@@ -210,7 +211,8 @@ def manage_report():
                 if report.measurement.count() == 0:
                     db.session.delete(report)
                     db.session.commit()
-                    print(f'Reporte con ID {report.id} eliminado correctamente.')
+                    print(f'Reporte con ID {
+                          report.id} eliminado correctamente.')
             return jsonify({'message': 'Informes sin mediciones asociadas eliminados correctamente.'}), 400
         except Exception as e:
             db.session.rollback()
