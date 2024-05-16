@@ -22,6 +22,7 @@ const ReportDetail = ({ messageToast }) => {
   const navigate = useNavigate();
   const params = useParams();
   const [report, setReport] = useState([]);
+  let penNamesUnique = [];
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_API_BASE_URL}/report/${params.reportId}`)
@@ -32,9 +33,8 @@ const ReportDetail = ({ messageToast }) => {
       })
       .catch((error) => messageToast(error.response.data.error));
   }, [messageToast, params.reportId]);
-  let penNamesUnique = [];
   if (typeof report.grouped_measurements == "object") {
-    const penNames = Object.values(report.grouped_measurements).map(
+    const penNames = Object.values(report?.grouped_measurements)?.map(
       (items) => items[0]?.pen_variable?.pen?.name
     );
     penNamesUnique.push(...new Set(penNames));
@@ -119,7 +119,7 @@ const ReportDetail = ({ messageToast }) => {
           }}
         />
       </Box>
-      {penNamesUnique.length ? (
+      {penNamesUnique?.length ? (
         <Tabs size={"sm"} marginTop={5} isLazy>
           <Box maxHeight={"100%"} overflowX={"auto"} overflowY={"hidden"}>
             <TabList borderColor={"transparent"}>
