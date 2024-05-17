@@ -102,11 +102,11 @@ const ModalReport = ({ messageToast, field_id, pens }) => {
           </ModalBody>
           <ModalFooter>
             <ButtonGroup spacing={2}>
-              <Button variant="ghost" onClick={onSubmit}>
+              <Button colorScheme="blue" onClick={onSubmit}>
                 Crear
               </Button>
-              <Button colorScheme="blue" mr={3} onClick={onClose}>
-                Close
+              <Button mr={3} onClick={onClose}>
+                Cerrar
               </Button>
             </ButtonGroup>
           </ModalFooter>
