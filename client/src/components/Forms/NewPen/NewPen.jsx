@@ -255,6 +255,8 @@ const NewPen = ({ messageToast }) => {
               <div key={`${attribute.name}-${i}`} className="my-1 m-1">
                 <Box display={"flex"} flexDirection={"column"} gap={1}>
                   <Box
+                    onClick={() => handleAttribute(attribute.id)}
+                    cursor={"pointer"}
                     display={"flex"}
                     className={
                       inUse
@@ -275,8 +277,6 @@ const NewPen = ({ messageToast }) => {
 
                     {!inUse && (
                       <AddIcon
-                        cursor={"pointer"}
-                        onClick={() => handleAttribute(attribute.id)}
                         fontSize={10}
                         marginRight={1}
                         marginLeft={2}
