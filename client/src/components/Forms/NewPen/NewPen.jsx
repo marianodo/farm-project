@@ -315,7 +315,15 @@ const NewPen = ({ messageToast }) => {
           })}
         </div>
       </div>
-      <button onClick={onSubmit} className="btn btn-primary btn-sm">
+      <button
+        disabled={
+          (data.name === "" && data.variables.length) === 0 ||
+          data.name === "" ||
+          data.variables.length === 0
+        }
+        onClick={onSubmit}
+        className="btn btn-primary btn-sm"
+      >
         Crear corral
       </button>
       <button

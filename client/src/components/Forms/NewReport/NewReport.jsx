@@ -5,7 +5,6 @@ import {
   Box,
   Text,
 } from "@chakra-ui/react";
-import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import ModalMeasurements from "../ModalMeasurements/ModalMeasurements";
@@ -122,12 +121,6 @@ const NewReport = ({ messageToast }) => {
                           <Text as="b" marginRight={4}>
                             {pen.name}
                           </Text>
-                          <button className="badge bg-info m-1">
-                            <EditIcon boxSize={3} />
-                          </button>
-                          <button className="badge bg-danger m-1">
-                            <DeleteIcon boxSize={3} />
-                          </button>
                         </Box>
                       </Box>
                       <Box marginLeft={4}>

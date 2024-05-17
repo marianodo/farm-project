@@ -27,20 +27,24 @@ const ModalReport = ({ messageToast, field_id, pens }) => {
   });
   const [error, setError] = useState("");
 
-  const onSubmit = () => {
-    axios
+  const onSubmit = async () => {
+    await axios
       .post(`${import.meta.env.VITE_API_BASE_URL}/report`, report)
       .then((response) => {
-        messageToast(response.data.message, "success");
+        messageToast(
+          response.data.message,
+          "success",
+          `/reportMeasurement/${report.field_id}/${response.data.report.id}`
+        );
         onClose();
-        setTimeout(() => {
-          window.location.href = `/reportMeasurement/${report.field_id}/${response.data.report.id}`;
-        }, 1200);
       })
       .catch((error) => {
         messageToast(error.response.data.error, "error");
       });
   };
+  // setTimeout(() => {
+  //   window.location.href = `/reportMeasurement/${report.field_id}/${response.data.report.id}`;
+  // }, 1200);
 
   return (
     <>
@@ -52,7 +56,10 @@ const ModalReport = ({ messageToast, field_id, pens }) => {
         fontSize={["8.4px", "10px"]}
         textTransform="uppercase"
         _hover={{ bg: "white", color: "#1a1a1a" }}
-        onClick={onOpen}
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpen();
+        }}
         isDisabled={!pens.length}
       >
         Crear Reporte

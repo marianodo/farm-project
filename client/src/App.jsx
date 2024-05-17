@@ -11,14 +11,19 @@ import NewPen from "./components/Forms/NewPen/NewPen";
 import NewReport from "./components/Forms/NewReport/NewReport";
 import ReportDetail from "./components/Forms/ReportDetail/ReportDetail";
 import Reports from "./components/Forms/Reports/Reports";
+import { useNavigate } from "react-router-dom";
 
 function App() {
-  const messageToast = (message, type) => {
+  const navigate = useNavigate();
+  const messageToast = (message, type, redirection) => {
     if (type === "success") {
       toast.success(message, {
         position: "top-right",
         autoClose: 1200,
       });
+      if (redirection !== "" && redirection !== undefined) {
+        return navigate(redirection);
+      }
     } else {
       toast.error(message, {
         position: "top-right",

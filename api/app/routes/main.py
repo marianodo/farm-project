@@ -136,20 +136,38 @@ def manage_pen():
         return jsonify(serialized_pens)
 
 
-@main_bp.route('/pen/<int:pen_id>', methods=['DELETE'])
+@main_bp.route('/pen/<int:pen_id>', methods=['DELETE', 'PUT'])
 def delete_pen(pen_id):
-    pen_to_delete = Pen.query.get(pen_id)
+    if request.method == "DELETE":
+        pen_to_delete = Pen.query.get(pen_id)
 
-    if not pen_to_delete:
-        return jsonify({'error': 'No se encontró el corral a eliminar'}), 404
-    try:
-        db.session.delete(pen_to_delete)
-        db.session.commit()
-        return jsonify({'message': 'Corral eliminado exitosamente'}), 200
-    except Exception as e:
-        db.session.rollback()
-        error_message = str(e)
-        return jsonify({'error': error_message}), 500
+        if not pen_to_delete:
+            return jsonify({'error': 'No se encontró el corral a eliminar'}), 404
+        try:
+            db.session.delete(pen_to_delete)
+            db.session.commit()
+            return jsonify({'message': 'Corral eliminado exitosamente'}), 200
+        except Exception as e:
+            db.session.rollback()
+            error_message = str(e)
+            return jsonify({'error': error_message}), 500
+    if request.method == 'PUT':
+        try:
+            pen = Pen.query.get_or_404(pen_id)
+            data = request.json
+            print("data", data)
+            new_name = data.get('name')
+            if new_name and new_name.lower() != pen.name.lower():
+                pen.name = new_name
+                db.session.commit()
+                return jsonify({'message': 'Corral modificada correctamente'}), 200
+            pen.validate()
+        except ValueError as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
 
 # Report routes
 
@@ -253,15 +271,35 @@ def manage_penVariable(new_pen_id=None, variables=None):
                                    for pen_variable in penVariables]
         return jsonify(serialized_penVariables)
 
-
+@main_bp.route('/penVariable/variable', methods=['DELETE'])
+def manage_penVariables_by_pen_variable_id():
+     if request.method == 'DELETE':
+        try:
+            data = request.json
+            pen_variables_id = data.get('penVariables')
+            print("variables", pen_variables_id)
+            for pen_variable_id in pen_variables_id:
+                pen_variable = PenVariable.query.get_or_404(pen_variable_id)
+                db.session.delete(pen_variable)
+                db.session.commit()
+            return jsonify({'message': 'Asociacion/es eliminada exitosamente.'}), 200
+        except ValueError as e:
+            error_message = str(e)
+            return jsonify({'error': error_message}), 400
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+    
+    
 @main_bp.route('/penVariable/<int:pen_id>', methods=['GET'])
-def get_penVariables_by_pen_id(pen_id):
-    penVariables = PenVariable.query.filter_by(pen_id=pen_id).all()
-    if not penVariables:
-        return jsonify({'message': f'No se encontraron relaciones PenVariable para el pen_id {pen_id}'}), 404
-    serialized_penVariables = [pen_variable.to_dict(only=(
-        'id', 'custom_parameters', 'variable')) for pen_variable in penVariables]
-    return jsonify(serialized_penVariables)
+def manage_penVariables_by_pen_id(pen_id):
+    if request.method == 'GET':
+        penVariables = PenVariable.query.filter_by(pen_id=pen_id).all()
+        if not penVariables:
+            return jsonify({'message': f'No se encontraron relaciones PenVariable para el pen_id {pen_id}'}), 404
+        serialized_penVariables = [pen_variable.to_dict(only=('id', 'custom_parameters', 'variable')) for pen_variable in penVariables]
+        return jsonify(serialized_penVariables)
+        
 
 # type_of_object routes
 

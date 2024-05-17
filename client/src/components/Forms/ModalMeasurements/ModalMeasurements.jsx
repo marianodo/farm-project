@@ -50,7 +50,6 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
     report_id: Number(report_id),
     measurements: {},
   });
-  console.log("data measurements:", data.measurements);
   const enableButton = () => {
     const measurements = Object.entries(data.measurements).some(
       ([key, value]) => value !== ""
@@ -66,7 +65,6 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
   };
 
   const handleTypeFilter = (event) => {
-    console.log("target name:", event.target.name);
     setEnumTypeSelect({});
     setNumberTypeSelect({});
     setBooleanTypeSelect({});
@@ -83,7 +81,7 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
       )
     );
   };
-  console.log("datita:", data);
+
   const validationNumber = (pen_variable_id, value, parameters) => {
     if (
       Number(value) % parameters.granularity !== 0 ||

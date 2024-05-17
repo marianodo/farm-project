@@ -13,7 +13,6 @@ import {
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import EditModalMeasurement from "../EditModalMeasurement/EditModalMeasurement";
-import { ViewIcon } from "@chakra-ui/icons";
 import axios from "axios";
 import { useEffect } from "react";
 import { useState } from "react";

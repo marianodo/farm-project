@@ -15,21 +15,27 @@ import {
   Tooltip,
   Wrap,
   WrapItem,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { useEffect, useState } from "react";
 
 import { FcDocument } from "react-icons/fc";
 import { Link } from "react-router-dom";
+import ModalAlert from "../../ModalAlert/ModalAlert";
 import ModalField from "./ModalField";
 import ModalReport from "./ModalReport";
+import PenModal from "../PenModal/PenModal";
 import axios from "axios";
 
 const CreateField = ({ messageToast }) => {
   const [fields, setFields] = useState([]);
   const [edit, setEdit] = useState(false);
-  const { onOpen } = useDisclosure();
+  const [pensUpdated, setPensUpdated] = useState(false);
+  const [penVariablesValues, setPenVariablesValues] = useState({});
+  const [pen, setPen] = useState([]);
+  const [openModalAlert, setOpenModalAlert] = useState(false);
+  const [openFieldModal, setOpenFieldModal] = useState(false);
+  const [openPenModal, setOpenPenModal] = useState(false);
   const [fieldName, setFieldName] = useState("");
   const [fieldId, setFieldId] = useState("");
   const addField = (field) => {
@@ -37,19 +43,14 @@ const CreateField = ({ messageToast }) => {
   };
 
   useEffect(() => {
-    if (!fields.length) {
-      axios
-        .get(`${import.meta.env.VITE_API_BASE_URL}/field`)
-        .then((response) => {
-          setFields(response.data ? response.data : []);
-        })
-        .catch((error) => console.log(error));
-    }
-  }, [fields?.length]);
-
-  {
-    console.log(fields);
-  }
+    axios
+      .get(`${import.meta.env.VITE_API_BASE_URL}/field`)
+      .then((response) => {
+        setFields(response.data ? response.data : []);
+      })
+      .catch((error) => console.log(error));
+    setPensUpdated(false);
+  }, [fields?.length, pensUpdated]);
 
   return (
     <div>
@@ -71,11 +72,28 @@ const CreateField = ({ messageToast }) => {
             fieldName={fieldName}
             fieldId={fieldId}
             setFieldName={setFieldName}
-            editOpen={onOpen}
+            editOpen={openFieldModal}
             edit={edit}
             setEdit={setEdit}
             addField={addField}
             messageToast={messageToast}
+          />
+          <PenModal
+            messageToast={messageToast}
+            pen={pen}
+            setPensUpdated={setPensUpdated}
+            penVariablesValues={penVariablesValues}
+            setPenVariablesValues={setPenVariablesValues}
+            setPen={setPen}
+            open={openPenModal}
+            setOpen={setOpenPenModal}
+          />
+          <ModalAlert
+            open={openModalAlert}
+            setOpen={setOpenModalAlert}
+            fieldId={fieldId}
+            setFields={setFields}
+            fields={fields}
           />
         </Box>
       </Box>
@@ -145,7 +163,7 @@ const CreateField = ({ messageToast }) => {
                               setEdit(true);
                               setFieldName(field.name);
                               setFieldId(field.id);
-                              onOpen();
+                              setOpenFieldModal(true);
                             }}
                           >
                             <EditIcon boxSize={3} />
@@ -153,18 +171,10 @@ const CreateField = ({ messageToast }) => {
                           <button className="badge bg-danger m-1">
                             <DeleteIcon
                               boxSize={3}
-                              onClick={async (event) => {
+                              onClick={(event) => {
                                 event.stopPropagation();
-                                await axios.delete(
-                                  `${import.meta.env.VITE_API_BASE_URL}/field/${
-                                    field.id
-                                  }`
-                                );
-                                const updatedFields = fields.filter(
-                                  (f) => f.id !== field.id
-                                );
-                                setFields(updatedFields);
-                                alert("Campo eliminado");
+                                setOpenModalAlert(true);
+                                setFieldId(field.id);
                               }}
                             />
                           </button>
@@ -194,8 +204,8 @@ const CreateField = ({ messageToast }) => {
                       area={"corral"}
                     >
                       <Wrap>
-                        {field?.pens.map((e, i) => (
-                          <WrapItem key={i}>
+                        {field?.pens.map((e) => (
+                          <WrapItem key={`tool-${index}`}>
                             <Tooltip label="Corral">
                               <Tag size={"sm"} fontSize={"11px"}>
                                 {e.name}
@@ -254,13 +264,13 @@ const CreateField = ({ messageToast }) => {
                     </Text>
                   ) : null}
 
-                  {field?.pens?.map((pen, i) => (
+                  {field?.pens?.map((pen) => (
                     <AccordionItem
                       borderBottom={0}
                       paddingTop={2}
                       paddingBottom={1}
                       borderTopColor="#2B6CB0"
-                      key={i}
+                      key={`accor-${index}`}
                     >
                       <Box display={"flex"} flexDirection={"column"}>
                         <AccordionButton>
@@ -270,7 +280,23 @@ const CreateField = ({ messageToast }) => {
                                 {pen.name}
                               </Text>
                               <button className="badge bg-info m-1">
-                                <EditIcon boxSize={3} />
+                                <EditIcon
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenPenModal(true);
+                                    setPen(pen);
+                                    let penvariables = {};
+                                    pen?.pen_variable?.map((p) => {
+                                      penvariables[
+                                        p.variable.name +
+                                          "-" +
+                                          p.variable.type_of_object.name
+                                      ] = p.id;
+                                    });
+                                    setPenVariablesValues(penvariables);
+                                  }}
+                                  boxSize={3}
+                                />
                               </button>
                               <button className="badge bg-danger m-1">
                                 <DeleteIcon boxSize={3} />
@@ -279,8 +305,8 @@ const CreateField = ({ messageToast }) => {
                           </Box>
                         </AccordionButton>
                         <Wrap marginX={3}>
-                          {pen.pen_variable.map((e, i) => (
-                            <WrapItem key={i}>
+                          {pen.pen_variable.map((e) => (
+                            <WrapItem key={`toolTag-${index}`}>
                               <Tooltip
                                 label={JSON.stringify(e.custom_parameters)}
                               >

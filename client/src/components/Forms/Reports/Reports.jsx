@@ -23,14 +23,12 @@ const Reports = ({ messageToast }) => {
         const reportFilter = response.data.filter(
           (report) => report.field_id == params.fieldId
         );
-        console.log("report Filter:", reportFilter);
         setReports(reportFilter);
         if (response.data.message)
           messageToast(response.data.message, "success");
       })
       .catch((error) => messageToast(error.response.data.error));
   }, []);
-  console.log(reports);
   return (
     <Box>
       <Box display={"flex"} flexDirection={"column"}>
@@ -131,16 +129,20 @@ const Reports = ({ messageToast }) => {
                         <Text as="b" marginRight={4}>
                           {report.name ? report.name : "Reporte: " + report.id}
                         </Text>
-                        <Link
-                          to={`/reportDetail/${params.fieldId}/${report.id} `}
-                        >
-                          <button
-                            className="badge m-1"
-                            style={{ background: "#666666", color: "white" }}
+
+                        {report?.measurement?.length > 0 && (
+                          <Link
+                            to={`/reportDetail/${params.fieldId}/${report.id} `}
                           >
-                            <ViewIcon boxSize={3} />
-                          </button>
-                        </Link>
+                            <button
+                              className="badge m-1"
+                              style={{ background: "#666666", color: "white" }}
+                            >
+                              <ViewIcon boxSize={3} />
+                            </button>
+                          </Link>
+                        )}
+
                         <button className="badge bg-danger m-1">
                           <DeleteIcon boxSize={3} />
                         </button>
