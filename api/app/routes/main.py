@@ -129,14 +129,14 @@ def manage_pen():
         if field_id:
             pens = Pen.query.filter(Pen.field_id == field_id).all()
             serialized_pens = [pen.to_dict(
-                rules=('field.name', '-variable')) for pen in pens]
+                rules=('field.name', '-variable',)) for pen in pens]
             return jsonify(serialized_pens)
         pens = Pen.query.all()
         serialized_pens = [pen.to_dict() for pen in pens]
         return jsonify(serialized_pens)
 
 
-@main_bp.route('/pen/<int:pen_id>', methods=['DELETE', 'PUT'])
+@main_bp.route('/pen/<int:pen_id>', methods=['GET','DELETE', 'PUT'])
 def delete_pen(pen_id):
     if request.method == "DELETE":
         pen_to_delete = Pen.query.get(pen_id)
@@ -267,7 +267,7 @@ def manage_penVariable(new_pen_id=None, variables=None):
             return jsonify({'error': error_message}), 500
     if request.method == 'GET':
         penVariables = PenVariable.query.all()
-        serialized_penVariables = [pen_variable.to_dict(rules=('-pen', '-variable'))
+        serialized_penVariables = [pen_variable.to_dict(rules=('-pen', '-variable',))
                                    for pen_variable in penVariables]
         return jsonify(serialized_penVariables)
 
@@ -403,6 +403,30 @@ def manage_measurement():
                     'measurements': measurements
                 })
         return jsonify(serialized_measurements)
+    
+    
+@main_bp.route('/measurement/<int:measurement_id>', methods=['PUT'])
+def manage_measurement_put(measurement_id):
+    if request.method == 'PUT':
+        try:
+            data = request.json
+            newValue = data.get('value')
+            measurement = Measurement.query.get_or_404(measurement_id)
+            if newValue is not None:
+                measurement.value = newValue  # Asigna el nuevo valor al campo correspondiente
+                db.session.commit()
+            return jsonify({'message': 'Campo actualizado exitosamente'}), 200
+            # measurement.validate()
+        except ValueError as e:
+            error_message = str(e)
+            return jsonify({'error': error_message}), 400
+        except Exception as e:
+            db.session.rollback()
+            error_message = str(e)
+            return jsonify({'error': error_message}), 500
+    
+    
+    
 
 # Variable routes
 

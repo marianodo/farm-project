@@ -27,7 +27,7 @@ class Pen(db.Model, SerializerMixin):
     name = db.Column(db.String(50), nullable=True, unique=False,
                      index=True, sqlite_on_conflict_unique='FAIL')
     field_id = db.Column(db.Integer, db.ForeignKey('field.id'), nullable=True)
-    serialize_rules = ("-pen_variable.pen", '-field.pens',)
+    serialize_rules = ("-pen_variable.pen", '-field.pen',)
     __table_args__ = (
         UniqueConstraint('name', 'field_id'),
     )
@@ -83,7 +83,7 @@ class PenVariable(db.Model, SerializerMixin):
         'Variable', backref='pen_variable')
     measurement = db.relationship(
         'Measurement', backref='pen_variable')
-    serialize_rules = ('-pen.pen_variable','-variable.pen_variable', '-measurement.pen_variable')
+    serialize_rules = ('-pen.pen_variable','-variable.pen_variable', '-measurement.pen_variable',)
 
 # Tipo de objeto
 

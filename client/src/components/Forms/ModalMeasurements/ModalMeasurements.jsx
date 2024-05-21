@@ -34,8 +34,9 @@ import {
 import { useEffect, useState } from "react";
 
 import axios from "axios";
+import messageToast from "../../../utils/messageToast";
 
-const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
+const ModalMeasurements = ({ name, pen_id, report_id }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [attributes, setAttributes] = useState([]);
   const [copyAttributes, setCopyAttributes] = useState([]);
@@ -213,8 +214,8 @@ const ModalMeasurements = ({ messageToast, name, pen_id, report_id }) => {
   return (
     <>
       <Button
-        bg="#18181b"
-        color="white"
+        bg="#edeef1"
+        color="#1a1a1a"
         size="sm"
         px={[2, 3]}
         fontSize={["8.4px", "10px"]}

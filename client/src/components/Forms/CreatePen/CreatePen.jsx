@@ -5,6 +5,7 @@ import axios from "axios";
 const CreatePen = () => {
   const [info, setInfo] = useState([]);
   const [data, setData] = useState({});
+
   const [selectedVariables, setSelectedVariables] = useState([]);
 
   useEffect(() => {
@@ -14,8 +15,10 @@ const CreatePen = () => {
           `${import.meta.env.VITE_API_BASE_URL}/pen`
         );
         setInfo(response.data);
+        // setLoader(false);
       } catch (error) {
         console.log(error);
+        // setLoader(false);
       }
     };
     asyncFetchData();

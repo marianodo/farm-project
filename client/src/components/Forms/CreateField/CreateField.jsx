@@ -21,13 +21,16 @@ import { useEffect, useState } from "react";
 
 import { FcDocument } from "react-icons/fc";
 import { Link } from "react-router-dom";
+import Loader from "../../Loader/Loader";
 import ModalAlert from "../../ModalAlert/ModalAlert";
 import ModalField from "./ModalField";
 import ModalReport from "./ModalReport";
 import PenModal from "../PenModal/PenModal";
+import { ToastContainer } from "react-toastify";
 import axios from "axios";
+import messageToast from "../../../utils/messageToast";
 
-const CreateField = ({ messageToast }) => {
+const CreateField = () => {
   const [fields, setFields] = useState([]);
   const [edit, setEdit] = useState(false);
   const [pensUpdated, setPensUpdated] = useState(false);
@@ -38,6 +41,7 @@ const CreateField = ({ messageToast }) => {
   const [openPenModal, setOpenPenModal] = useState(false);
   const [fieldName, setFieldName] = useState("");
   const [fieldId, setFieldId] = useState("");
+  const [loader, setLoader] = useState(true);
   const addField = (field) => {
     setFields([...fields, field]);
   };
@@ -47,13 +51,19 @@ const CreateField = ({ messageToast }) => {
       .get(`${import.meta.env.VITE_API_BASE_URL}/field`)
       .then((response) => {
         setFields(response.data ? response.data : []);
+        setLoader(false);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.log(error);
+        setLoader(false);
+      });
     setPensUpdated(false);
   }, [fields?.length, pensUpdated]);
-
+  console.log("CAMPOS", fields);
+  if (loader) return <Loader />;
   return (
     <div>
+      <ToastContainer />
       <Box
         as="span"
         flex="1"
@@ -65,7 +75,9 @@ const CreateField = ({ messageToast }) => {
         paddingBottom={6}
         alignItems={"center"}
       >
-        <h1>Jhon Doe</h1>
+        <Text as="h2" color={"#fff"}>
+          Jhon Doe
+        </Text>
         <Box>
           <ModalField
             setFields={setFields}
@@ -152,7 +164,7 @@ const CreateField = ({ messageToast }) => {
                   >
                     <GridItem justifySelf={["left"]} pr="0" area={"text-icon"}>
                       <Box display={"flex"} gap={[2]}>
-                        <Text as="b" marginRight={0}>
+                        <Text as="b" marginRight={0} color={"#fff"}>
                           {field.name}
                         </Text>
                         <ButtonGroup pl={[0, 2]} alignItems={"center"}>
@@ -178,36 +190,39 @@ const CreateField = ({ messageToast }) => {
                               }}
                             />
                           </button>
-                          <Button
-                            as={Link}
+                          <Link
                             to={`/reports/${field.id}`}
-                            margin={0}
-                            padding={0}
-                            size={"xs"}
+                            style={{ marginLeft: "0.1rem" }}
                           >
                             <Icon
                               cursor={"pointer"}
                               as={FcDocument}
-                              w={5}
-                              h={5}
+                              w={6}
+                              h={6}
                             />
-                          </Button>
+                          </Link>
+                          {/* </Button> */}
                         </ButtonGroup>
                       </Box>
                     </GridItem>
                     <GridItem area={"accordion-icon"} justifySelf={["right"]}>
-                      <AccordionIcon />
+                      <AccordionIcon color={"#fff"} />
                     </GridItem>
                     <GridItem
                       justifySelf={["left"]}
-                      pt={[3, 3, 3, 1]}
+                      pt={[3, 3, 1, 1]}
                       area={"corral"}
                     >
                       <Wrap>
                         {field?.pens.map((e) => (
                           <WrapItem key={`tool-${index}`}>
                             <Tooltip label="Corral">
-                              <Tag size={"sm"} fontSize={"11px"}>
+                              <Tag
+                                backgroundColor={"#1F9ACF"}
+                                color={"#fff"}
+                                size={"sm"}
+                                fontSize={"11px"}
+                              >
                                 {e.name}
                               </Tag>
                             </Tooltip>
@@ -216,7 +231,9 @@ const CreateField = ({ messageToast }) => {
                       </Wrap>
                     </GridItem>
                     <GridItem
-                      paddingTop={[2, 2, 2, 0]}
+                      paddingTop={[2, 2, 0, 0]}
+                      paddingBottom={[2, 0]}
+                      paddingRight={[0, 0, 4, 0]}
                       area={"button-group"}
                       justifySelf={["left", "left", "left", "auto"]}
                       width={"100%"}
@@ -238,9 +255,10 @@ const CreateField = ({ messageToast }) => {
                         <Button
                           as={Link}
                           to={`/newPen/${field.name}/${field.id}`}
-                          bg="#1a1a1a"
-                          color="white"
-                          size="sm"
+                          bg="#edeef1"
+                          color="#1a1a1a"
+                          size="xs"
+                          py={4}
                           px={[2, 3]}
                           fontSize={["8.4px", "10px"]}
                           textTransform="uppercase"
@@ -276,7 +294,11 @@ const CreateField = ({ messageToast }) => {
                         <AccordionButton>
                           <Box flex="1" textAlign="left">
                             <Box display={"flex"} gap={1}>
-                              <Text as="b" marginRight={4}>
+                              <Text
+                                as="b"
+                                color={"#fff"}
+                                marginRight={[2, 4, 4, 4]}
+                              >
                                 {pen.name}
                               </Text>
                               <button className="badge bg-info m-1">
@@ -310,7 +332,12 @@ const CreateField = ({ messageToast }) => {
                               <Tooltip
                                 label={JSON.stringify(e.custom_parameters)}
                               >
-                                <Tag size={"sm"} fontSize={"11px"}>
+                                <Tag
+                                  backgroundColor={"#1F9ACF"}
+                                  color={"#fff"}
+                                  size={"sm"}
+                                  fontSize={"11px"}
+                                >
                                   {e.variable.name} -{" "}
                                   {e.variable.type_of_object.name}
                                 </Tag>

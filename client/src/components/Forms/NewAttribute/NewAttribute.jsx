@@ -179,16 +179,21 @@ const NewAtributte = ({ messageToast, addAttribute, typeObjects }) => {
   return (
     <>
       <ToastContainer />
-      <button
+      <Button
+        bg="#edeef1"
+        color="#1a1a1a"
+        size="xs"
+        py={4}
+        fontSize="10px"
+        textTransform="uppercase"
+        _hover={{ bg: "white", color: "#1a1a1a" }}
         onClick={() => {
           onOpen();
           resetAttribute();
         }}
-        className="btn btn-primary btn-sm align-content-center"
       >
         Crear atributo
-      </button>
-
+      </Button>
       <Modal
         isCentered
         isOpen={isOpen}

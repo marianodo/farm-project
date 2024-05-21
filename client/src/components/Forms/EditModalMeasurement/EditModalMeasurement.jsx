@@ -32,11 +32,14 @@ import {
 
 import { EditIcon } from "@chakra-ui/icons";
 import axios from "axios";
+import messageToast from "../../../utils/messageToast";
 import { useState } from "react";
 
-const EditModalMeasurement = ({ messageToast, pen_variable, valueM, id }) => {
+const EditModalMeasurement = ({ setRefresh, pen_variable, valueM, id }) => {
+  console.log(pen_variable);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [errors, setErrors] = useState({});
+  const [value, setValue] = useState(null);
   const [data, setData] = useState({
     cowName: "",
     pen_id: "",
@@ -83,6 +86,7 @@ const EditModalMeasurement = ({ messageToast, pen_variable, valueM, id }) => {
         delete newErrors[pen_variable_id];
         setErrors(newErrors);
       }
+      setValue(value);
     }
   };
   const validationBoolean = (pen_variable_id, value, parameters) => {
@@ -99,6 +103,7 @@ const EditModalMeasurement = ({ messageToast, pen_variable, valueM, id }) => {
         delete newErrors[pen_variable_id];
         setErrors(newErrors);
       }
+      setValue(value);
     }
   };
 
@@ -117,15 +122,22 @@ const EditModalMeasurement = ({ messageToast, pen_variable, valueM, id }) => {
         delete newErrors[pen_variable_id];
         setErrors(newErrors);
       }
+      setValue(value);
     }
   };
 
+  console.log(data);
+  console.log(value);
+
   const handelSubmit = () => {
     axios
-      .post(`${import.meta.env.VITE_API_BASE_URL}/measurement`, data)
+      .put(`${import.meta.env.VITE_API_BASE_URL}/measurement/${id}`, {
+        value: value,
+      })
       .then((response) => {
         messageToast(response.data.message, "success");
         setData({ ...data, measurements: {} });
+        setRefresh(true);
       })
       .catch((error) => console.log(error));
   };

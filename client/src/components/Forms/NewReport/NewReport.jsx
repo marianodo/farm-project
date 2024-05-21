@@ -3,11 +3,14 @@ import {
   AccordionButton,
   AccordionItem,
   Box,
+  Highlight,
   Text,
 } from "@chakra-ui/react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
+import Loader from "../../Loader/Loader";
 import ModalMeasurements from "../ModalMeasurements/ModalMeasurements";
+import { ToastContainer } from "react-toastify";
 import axios from "axios";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -15,33 +18,77 @@ import { useState } from "react";
 const NewReport = ({ messageToast }) => {
   const navigate = useNavigate();
   const [pens, setPens] = useState([]);
+  const [loader, setLoader] = useState(true);
   const params = useParams();
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_API_BASE_URL}/pen?fieldId=${params.fieldId}`)
       .then((response) => {
         setPens(response.data);
+        setLoader(false);
       });
   }, []);
 
+  if (loader) return <Loader />;
   return (
-    <Box>
-      <Box display={"flex"} flexDirection={"column"}>
+    <Box marginTop={6}>
+      <ToastContainer />
+      <Box
+        display={"flex"}
+        flexDirection={["column", "row"]}
+        justifyContent={["center", "space-between"]}
+        gap={4}
+        marginBottom={8}
+      >
         <Text
           as="b"
+          color={"#edeef1"}
           fontSize={["18px", "20px"]}
           fontWeight={500}
           textAlign={"center"}
         >
-          Campo: {pens[0]?.field?.name}
+          Campo:{" "}
+          {pens[0]?.field?.name ? (
+            <Highlight
+              textAlign="center"
+              query={`${pens[0]?.field?.name}`}
+              styles={{
+                px: "1",
+                rounded: "8px",
+                color: "#edeef1",
+                paddingBottom: "2px",
+                paddingTop: "0px",
+                bg: "#2B6CB0",
+              }}
+            >
+              {`${pens[0]?.field?.name}`}
+            </Highlight>
+          ) : (
+            pens[0]?.field?.name
+          )}
         </Text>
         <Text
           as="b"
+          color={"#edeef1"}
           fontSize={["18px", "20px"]}
           fontWeight={500}
           textAlign={"center"}
         >
-          Reporte: {params.reportId}
+          Reporte:{" "}
+          <Highlight
+            textAlign="center"
+            query={`${params.reportId}`}
+            styles={{
+              px: "3",
+              rounded: "8px",
+              color: "#edeef1",
+              paddingBottom: "2px",
+              paddingTop: "0px",
+              bg: "#2B6CB0",
+            }}
+          >
+            {params.reportId}
+          </Highlight>
         </Text>
       </Box>
       <Box
@@ -65,28 +112,13 @@ const NewReport = ({ messageToast }) => {
         <Text
           padding={1}
           as="mark"
-          bg="#18181b"
-          color="white"
+          bg="#edeef1"
+          color="#1a1a1a"
           fontWeight={500}
           fontSize={["15px", "15px"]}
           _hover={{ bg: "white", color: "#1a1a1a", cursor: "pointer" }}
           textTransform="uppercase"
         >
-          <hr
-            color="black"
-            width="100%"
-            style={{
-              height: "3px",
-              marginTop: "18px",
-              position: "absolute",
-              top: "12px",
-              opacity: "1",
-              border: "none",
-              zIndex: 2,
-              width: "4.23rem",
-              marginLeft: "-3.6px",
-            }}
-          />
           <Link onClick={() => navigate(-1)}>Volver</Link>
         </Text>
         <hr
@@ -102,14 +134,24 @@ const NewReport = ({ messageToast }) => {
           }}
         />
       </Box>
-      <Box marginTop={3} style={{ height: "calc(100vh - 18rem)" }}>
-        <Box maxHeight={"100%"} overflowY={"auto"}>
-          <Accordion borderTopWidth={0} borderBottomWidth={0} allowToggle>
+      <Box marginTop={4} style={{ height: "calc(100vh - 17.4rem)" }}>
+        <Box height={"100%"} overflowY={"auto"}>
+          <Accordion
+            borderTopWidth={0}
+            borderBottomWidth={1}
+            minHeight={"100%"}
+            allowToggle
+          >
             {pens.map((pen, i) => (
               <>
                 <AccordionItem
-                  border={"1px solid black"}
-                  borderBottom={"0px solid black"}
+                  height={"5.43rem"}
+                  border={"1px solid #6a788d"}
+                  borderLeft={0}
+                  borderRight={0}
+                  // borderBottom={"0px solid black"}
+                  // borderTopWidth={0}
+                  borderBlockStart={0}
                   paddingTop={[2, 3, 4]}
                   paddingBottom={[2, 3, 4]}
                   key={i}
@@ -118,7 +160,7 @@ const NewReport = ({ messageToast }) => {
                     <AccordionButton>
                       <Box flex="1" textAlign="left">
                         <Box display={"flex"} gap={1}>
-                          <Text as="b" marginRight={4}>
+                          <Text as="b" color={"#edeef1"} marginRight={4}>
                             {pen.name}
                           </Text>
                         </Box>

@@ -2,6 +2,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import {
   Button,
+  ButtonGroup,
   FormControl,
   FormLabel,
   Input,
@@ -15,7 +16,9 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 
+import { ToastContainer } from "react-toastify";
 import axios from "axios";
+import messageToast from "../../../utils/messageToast";
 import { useState } from "react";
 
 const ModalField = ({
@@ -27,7 +30,6 @@ const ModalField = ({
   edit,
   setEdit,
   addField,
-  messageToast,
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [inputField, setInputField] = useState("");
@@ -77,11 +79,12 @@ const ModalField = ({
 
   return (
     <>
+      {/* <ToastContainer /> */}
       <Button
-        bg="#1a1a1a"
-        color="white"
-        size="sm"
-        py={5}
+        bg="#edeef1"
+        color="#1a1a1a"
+        size="xs"
+        py={4}
         fontSize="10px"
         textTransform="uppercase"
         _hover={{ bg: "white", color: "#1a1a1a" }}
@@ -112,17 +115,19 @@ const ModalField = ({
               </ModalBody>
 
               <ModalFooter>
-                <Button
-                  bg="#1a1a1a"
-                  color="white"
-                  mr={3}
-                  _hover={{ bg: "#1a1a1a", color: "white" }}
-                  onClick={postField}
-                  isDisabled={isFormInvalid}
-                >
-                  Crear
-                </Button>
-                <Button onClick={handleClose}>Cancelar</Button>
+                <ButtonGroup spacing={2}>
+                  <Button
+                    background={"#11577b"}
+                    color={"#fff"}
+                    _hover={{ background: "#144966" }}
+                    onClick={postField}
+                  >
+                    Crear
+                  </Button>
+                  <Button mr={3} onClick={handleClose} background={"#edeef1"}>
+                    Cerrar
+                  </Button>
+                </ButtonGroup>
               </ModalFooter>
             </ModalContent>
           </Modal>

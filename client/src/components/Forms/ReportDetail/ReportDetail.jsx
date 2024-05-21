@@ -13,25 +13,35 @@ import {
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import EditModalMeasurement from "../EditModalMeasurement/EditModalMeasurement";
+import Loader from "../../Loader/Loader";
+import { ToastContainer } from "react-toastify";
 import axios from "axios";
+import messageToast from "../../../utils/messageToast";
 import { useEffect } from "react";
 import { useState } from "react";
 
-const ReportDetail = ({ messageToast }) => {
+const ReportDetail = () => {
   const navigate = useNavigate();
   const params = useParams();
   const [report, setReport] = useState([]);
+  const [loader, setLoader] = useState(true);
+  const [refresh, setRefresh] = useState(false);
   let penNamesUnique = [];
   useEffect(() => {
+    setRefresh(false);
     axios
       .get(`${import.meta.env.VITE_API_BASE_URL}/report/${params.reportId}`)
       .then((response) => {
         setReport(response.data);
+        setLoader(false);
         if (response.data.message)
           messageToast(response.data.message, "success");
       })
-      .catch((error) => messageToast(error.response.data.error));
-  }, [messageToast, params.reportId]);
+      .catch((error) => {
+        messageToast(error.response.data.error);
+        setLoader(false);
+      });
+  }, [refresh, params.reportId]);
   if (typeof report.grouped_measurements == "object") {
     const penNames = Object.values(report?.grouped_measurements)?.map(
       (items) => items[0]?.pen_variable?.pen?.name
@@ -39,14 +49,18 @@ const ReportDetail = ({ messageToast }) => {
     penNamesUnique.push(...new Set(penNames));
   }
 
+  if (loader) return <Loader />;
+
   return (
-    <Box>
-      <Box display={"flex"} flexDirection={"column"}>
+    <>
+      <ToastContainer />
+      <Box display={"flex"} flexDirection={"column"} marginTop={6}>
         <Text
           as="b"
           fontSize={["18px", "20px"]}
           fontWeight={500}
           textAlign={"center"}
+          color="#ffffff"
         >
           {report?.name ? report?.name : "Reporte" + report?.id}
         </Text>
@@ -80,29 +94,13 @@ const ReportDetail = ({ messageToast }) => {
         <Text
           padding={1}
           as="mark"
-          bg="#18181b"
-          color="white"
+          bg="#edeef1"
+          color="#1a1a1a"
           fontWeight={500}
           fontSize={["15px", "15px"]}
           _hover={{ bg: "white", color: "#1a1a1a", cursor: "pointer" }}
           textTransform="uppercase"
         >
-          <hr
-            color="black"
-            width="100%"
-            style={{
-              cursor: "pointer",
-              height: "3px",
-              marginTop: "18px",
-              position: "absolute",
-              top: "12px",
-              opacity: "1",
-              border: "none",
-              zIndex: 2,
-              width: "4.26rem",
-              marginLeft: "-3.9px",
-            }}
-          />
           <Link onClick={() => navigate(-1)}>Volver</Link>
         </Text>
         <hr
@@ -145,8 +143,8 @@ const ReportDetail = ({ messageToast }) => {
               ))}
             </TabList>
           </Box>
-          <Box marginTop={3} style={{ height: "calc(100vh - 18rem)" }}>
-            <Box maxHeight={"100%"} overflowX={"hidden"} overflowY={"auto"}>
+          <Box marginTop={3} style={{ height: "calc(100vh - 16rem)" }}>
+            <Box height={"100%"} overflowX={"hidden"} overflowY={"auto"}>
               <TabPanels>
                 {penNamesUnique?.map((p, i) => (
                   <TabPanel
@@ -158,12 +156,12 @@ const ReportDetail = ({ messageToast }) => {
                     <Box maxHeight={"100%"} overflowY={"auto"}>
                       {report?.grouped_measurements &&
                         Object.keys(report?.grouped_measurements)
-                          ?.filter((m) =>
-                            report?.grouped_measurements[m][
-                              m - m
-                            ]?.pen_variable?.pen?.name
-                              .toLowerCase()
-                              .includes(p.toLowerCase())
+                          ?.filter(
+                            (m) =>
+                              report?.grouped_measurements[m][
+                                m - m
+                              ]?.pen_variable?.pen?.name.toLowerCase() ===
+                              p.toLowerCase()
                           )
                           .map((k, i) => (
                             <Box
@@ -171,9 +169,15 @@ const ReportDetail = ({ messageToast }) => {
                               display={"flex"}
                               flexDirection={"column"}
                               gap={1}
+                              marginBottom={5}
                             >
-                              <Box marginBottom={2} marginTop={2}>
-                                <Text as="b" fontSize={20}>
+                              <Box marginBottom={0} marginTop={0}>
+                                <Text
+                                  as="b"
+                                  fontSize={18}
+                                  fontWeight={700}
+                                  color={"#ffffff"}
+                                >
                                   {report?.grouped_measurements[k][0]?.object
                                     ?.name
                                     ? report?.grouped_measurements[k][0]?.object
@@ -187,17 +191,20 @@ const ReportDetail = ({ messageToast }) => {
                               </Box>
                               <Accordion
                                 borderTopWidth={0}
-                                borderBottomWidth={0}
+                                borderBottomWidth={1}
+                                minHeight={"100%"}
                                 allowToggle
                               >
                                 {report?.grouped_measurements[k]?.map(
                                   (m, i) => (
                                     <>
                                       <AccordionItem
-                                        border={"1px solid black"}
-                                        borderBottom={"0px solid black"}
-                                        // paddingTop={[2, 3, 4]}
-                                        // paddingBottom={[2, 3, 4]}
+                                        border={"1px solid #6a788d"}
+                                        borderLeft={0}
+                                        borderRight={0}
+                                        borderBlockStart={0}
+                                        paddingTop={[1, 3, 4]}
+                                        // paddingBottom={[1, 3, 4]}
                                         key={i}
                                       >
                                         <Box
@@ -218,10 +225,11 @@ const ReportDetail = ({ messageToast }) => {
                                                   gap={1}
                                                 >
                                                   <Text
-                                                    as="b"
+                                                    as="abbr"
                                                     marginRight={2}
-                                                    fontSize={13}
+                                                    fontSize={10}
                                                     textTransform={"uppercase"}
+                                                    color={"#ffffff"}
                                                   >
                                                     {
                                                       m?.pen_variable?.variable
@@ -237,7 +245,7 @@ const ReportDetail = ({ messageToast }) => {
                                                 </Box>
                                                 <Box marginLeft={0}>
                                                   <EditModalMeasurement
-                                                    messageToast={messageToast}
+                                                    setRefresh={setRefresh}
                                                     pen_variable={
                                                       m?.pen_variable
                                                     }
@@ -264,7 +272,7 @@ const ReportDetail = ({ messageToast }) => {
           </Box>
         </Tabs>
       ) : null}
-    </Box>
+    </>
   );
 };
 

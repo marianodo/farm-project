@@ -91,7 +91,7 @@ export default function EditAttribute({
     <>
       <EditIcon
         cursor={"pointer"}
-        backgroundColor={"#1F9BCF"}
+        backgroundColor={"#1f9bcf"}
         fontSize={30}
         paddingX={"0.2rem"}
         paddingY={"0.12rem"}
