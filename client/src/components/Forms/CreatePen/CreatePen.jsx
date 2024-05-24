@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+
+import axios from "axios";
 
 const CreatePen = () => {
   const [info, setInfo] = useState([]);
   const [data, setData] = useState({});
+
   const [selectedVariables, setSelectedVariables] = useState([]);
 
   useEffect(() => {
@@ -13,9 +15,10 @@ const CreatePen = () => {
           `${import.meta.env.VITE_API_BASE_URL}/pen`
         );
         setInfo(response.data);
-        // if (response.data.message) alert(response.data.message);
+        // setLoader(false);
       } catch (error) {
         console.log(error);
+        // setLoader(false);
       }
     };
     asyncFetchData();
@@ -88,7 +91,7 @@ const CreatePen = () => {
       <select
         id="fieldId"
         name="field_id"
-        defaultValue={'default'}
+        defaultValue={"default"}
         onChange={handleChange}
         required
       >

@@ -21,7 +21,7 @@ import NewAtributte from "../NewAttribute/NewAttribute";
 import axios from "axios";
 import messageToast from "../../../utils/messageToast";
 
-const NewPen = () => {
+const EditPen = () => {
   const navigate = useNavigate();
   const params = useParams();
   const [attributes, setAttributes] = useState([]);
@@ -402,4 +402,4 @@ const NewPen = () => {
   );
 };
 
-export default NewPen;
+export default EditPen;

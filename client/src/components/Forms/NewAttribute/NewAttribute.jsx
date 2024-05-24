@@ -1,58 +1,63 @@
-import { useState } from 'react';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
+
 import {
+  Button,
+  Checkbox,
+  CheckboxGroup,
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  HStack,
+  Input,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  useDisclosure,
-  RadioGroup,
-  HStack,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Radio,
-  FormHelperText,
-  Wrap,
+  RadioGroup,
+  Stack,
   Tooltip,
-} from '@chakra-ui/react';
-import axios from 'axios';
+  Wrap,
+  useDisclosure,
+} from "@chakra-ui/react";
 
-const NewAtributte = ({ addAttribute }) => {
+import { ToastContainer } from "react-toastify";
+import axios from "axios";
+import { useState } from "react";
+
+const NewAtributte = ({ messageToast, addAttribute, typeObjects }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [attribute, setAttribute] = useState({
-    name: '',
-    type: 'number',
+    name: "",
+    type: "number",
+    typeOfObjectId: [],
     parameters: {
-      granularity: 0.25,
+      granularity: 1,
       value: {
         min: 1,
-        max: 1000,
-        optimo_min: 100,
-        optimo_max: 500,
+        max: 10,
+        optimo_min: 4,
+        optimo_max: 6,
       },
     },
   });
   const [enumItems, setEnumItems] = useState([]);
-  const [enumInput, setEnumInput] = useState('');
-  const [boleanInput, setBoleanInput] = useState('true');
-  const [granularityInput, setGranularityInput] = useState(0.25);
+  const [enumInput, setEnumInput] = useState("");
+  const [booleanInput, setBooleanInput] = useState("true");
+  const [granularityInput, setGranularityInput] = useState(1);
   const [numberInput, setnumberInput] = useState({
     min: 1,
-    max: 1000,
-    optimo_min: 100,
-    optimo_max: 500,
+    max: 10,
+    optimo_min: 4,
+    optimo_max: 6,
   });
 
   const postAttribute = () => {
     let body = attribute;
-    //el id no deberia existir y se tiene que hacer el axios al back con la respuesta ejecutar el addAttribute
-    if (attribute.type === 'number') {
+    if (attribute.type === "number") {
       body = {
         ...attribute,
         parameters: { ...attribute.parameters, granularity: granularityInput },
@@ -62,16 +67,30 @@ const NewAtributte = ({ addAttribute }) => {
       .post(`${import.meta.env.VITE_API_BASE_URL}/variable`, body)
       .then((response) => {
         addAttribute(response.data);
+        setEnumItems([]);
         onClose();
+        messageToast(response.data.message, "success");
       })
-      .catch((error) => console.log(error));
+      .catch((error) => messageToast(error.response.data.error));
   };
   const handleName = (e) => {
     setAttribute({
       ...attribute,
-      name: e.target.value,
+      name: e.target.value.toUpperCase(),
     });
   };
+
+  const handleRadioType = (value) => {
+    let types = [];
+    value.map((type) => {
+      types.push(typeObjects[type]);
+    });
+    setAttribute({
+      ...attribute,
+      typeOfObjectId: types,
+    });
+  };
+
   const handleRadio = (value) => {
     setAttribute({
       ...attribute,
@@ -82,18 +101,18 @@ const NewAtributte = ({ addAttribute }) => {
     });
   };
   const getDefaultByType = (value) => {
-    if (value === 'number') {
+    if (value === "number") {
       return numberInput;
     }
-    if (value === 'enum') {
+    if (value === "enum") {
       return enumItems;
     }
-    if (value === 'bolean') {
-      return boleanInput;
+    if (value === "boolean") {
+      return booleanInput;
     }
   };
-  const handleBoleanInput = (value) => {
-    setBoleanInput(value);
+  const handleBooleanInput = (value) => {
+    setBooleanInput(value);
     setAttribute({
       ...attribute,
       parameters: {
@@ -104,14 +123,15 @@ const NewAtributte = ({ addAttribute }) => {
 
   const resetAttribute = () => {
     setAttribute({
-      name: '',
-      type: 'number',
+      name: "",
+      type: "number",
+      typeOfObjectId: [],
       parameters: {
         value: {
           min: 1,
-          max: 1000,
-          optimo_min: 100,
-          optimo_max: 200,
+          max: 10,
+          optimo_min: 4,
+          optimo_max: 6,
         },
       },
     });
@@ -122,7 +142,7 @@ const NewAtributte = ({ addAttribute }) => {
   };
 
   const addEnumItem = () => {
-    if (enumInput != '' && !enumItems.find((value) => value === enumInput)) {
+    if (enumInput != "" && !enumItems.find((value) => value === enumInput)) {
       setEnumItems([...enumItems, enumInput]);
       setAttribute({
         ...attribute,
@@ -131,11 +151,11 @@ const NewAtributte = ({ addAttribute }) => {
         },
       });
     }
-    setEnumInput('');
+    setEnumInput("");
   };
 
   const handleEnumItemInput = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       addEnumItem();
     }
   };
@@ -159,24 +179,37 @@ const NewAtributte = ({ addAttribute }) => {
   return (
     <>
       <ToastContainer />
-      <button
+      <Button
+        bg="#edeef1"
+        color="#1a1a1a"
+        size="xs"
+        py={4}
+        fontSize="10px"
+        textTransform="uppercase"
+        _hover={{ bg: "white", color: "#1a1a1a" }}
         onClick={() => {
           onOpen();
           resetAttribute();
         }}
-        className="btn btn-primary btn-sm align-content-center"
       >
         Crear atributo
-      </button>
-
-      <Modal isCentered isOpen={isOpen} onClose={onClose}>
+      </Button>
+      <Modal
+        isCentered
+        isOpen={isOpen}
+        onClose={() => {
+          setEnumItems([]);
+          onClose();
+        }}
+        scrollBehavior="inside"
+      >
         <ModalOverlay />
         <ModalContent marginX={6}>
-          <ModalHeader>Nuevo atributo</ModalHeader>
+          <ModalHeader>Nueva variable</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
             <FormControl>
-              <FormLabel>Nombre del atributo</FormLabel>
+              <FormLabel>Nombre de la variable</FormLabel>
               <Input
                 onChange={handleName}
                 value={attribute.name}
@@ -186,19 +219,39 @@ const NewAtributte = ({ addAttribute }) => {
               />
             </FormControl>
             <FormControl mt={4} as="fieldset">
-              <FormLabel as="legend">Tipo</FormLabel>
+              {Object.keys(typeObjects).length > 0 && (
+                <>
+                  <FormLabel as="legend">Tipo de objeto</FormLabel>
+                  <CheckboxGroup colorScheme="blue" onChange={handleRadioType}>
+                    <Stack
+                      paddingBottom={2}
+                      spacing={[1, 5]}
+                      direction={["column", "row"]}
+                    >
+                      {Object.keys(typeObjects).map((type, i) => (
+                        <>
+                          <Checkbox key={i} value={type}>
+                            {type}
+                          </Checkbox>
+                        </>
+                      ))}
+                    </Stack>
+                  </CheckboxGroup>
+                </>
+              )}
+              <FormLabel as="legend">Tipo de variable</FormLabel>
               <RadioGroup defaultValue="number" onChange={handleRadio}>
                 <HStack spacing="1rem">
                   <Wrap>
                     <Radio value="number">Numerico</Radio>
-                    <Radio value="bolean">Boleano</Radio>
+                    <Radio value="boolean">Booleano</Radio>
                     <Radio value="enum">Lista</Radio>
                   </Wrap>
                 </HStack>
               </RadioGroup>
               <FormHelperText mb={4}>Valor por defecto</FormHelperText>
 
-              {attribute.type === 'number' && (
+              {attribute.type === "number" && (
                 <div>
                   <FormControl>
                     <FormLabel>Valor minimo</FormLabel>
@@ -252,12 +305,12 @@ const NewAtributte = ({ addAttribute }) => {
                   </FormControl>
                 </div>
               )}
-              {attribute.type === 'bolean' && (
+              {attribute.type === "boolean" && (
                 <div>
                   <RadioGroup
                     defaultValue="true"
-                    value={boleanInput}
-                    onChange={handleBoleanInput}
+                    value={booleanInput}
+                    onChange={handleBooleanInput}
                   >
                     <HStack spacing="1rem">
                       <Wrap>
@@ -268,7 +321,7 @@ const NewAtributte = ({ addAttribute }) => {
                   </RadioGroup>
                 </div>
               )}
-              {attribute.type === 'enum' && (
+              {attribute.type === "enum" && (
                 <div>
                   <Wrap>
                     {enumItems.map((value, i) => (
@@ -278,9 +331,9 @@ const NewAtributte = ({ addAttribute }) => {
                           hasArrow
                           bg="#1a1a1a"
                           placement="top"
+                          key={i}
                         >
                           <Button
-                            key={i}
                             className="m-1"
                             onClick={() => removeEnumItem(value)}
                           >
@@ -292,15 +345,17 @@ const NewAtributte = ({ addAttribute }) => {
                   </Wrap>
 
                   <FormControl
-                    alignItems={'center'}
-                    justifyContent={'start'}
-                    display={'flex'}
-                    flexWrap={'wrap'}
+                    alignItems={"center"}
+                    justifyContent={"start"}
+                    display={"flex"}
+                    flexWrap={"wrap"}
                   >
                     <Input
-                      onChange={(e) => setEnumInput(e.target.value)}
+                      onChange={(e) =>
+                        setEnumInput(e.target.value.toUpperCase())
+                      }
                       onKeyDown={handleEnumItemInput}
-                      width={'70%'}
+                      width={"70%"}
                       m={2}
                       value={enumInput}
                       focusBorderColor="#1a1a1a"
@@ -320,13 +375,14 @@ const NewAtributte = ({ addAttribute }) => {
               bg="#1a1a1a"
               color="white"
               mr={3}
-              _hover={{ bg: '#1a1a1a', color: 'white' }}
+              _hover={{ bg: "#1a1a1a", color: "white" }}
               onClick={postAttribute}
             >
               Crear
             </Button>
             <Button
               onClick={() => {
+                setEnumItems([]);
                 onClose();
               }}
             >

@@ -1,143 +1,357 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
 import {
   Accordion,
-  AccordionItem,
   AccordionButton,
-  AccordionPanel,
   AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
   Box,
+  Button,
+  ButtonGroup,
+  Grid,
+  GridItem,
+  Icon,
+  Tag,
   Text,
   Tooltip,
-  Tag,
   Wrap,
   WrapItem,
-} from '@chakra-ui/react';
-import { EditIcon, DeleteIcon } from '@chakra-ui/icons';
-import { Link } from 'react-router-dom';
-import ModalField from './ModalField';
-const CreateField = ({ messageToast }) => {
+} from "@chakra-ui/react";
+import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
+import { useEffect, useState } from "react";
+
+import { FcDocument } from "react-icons/fc";
+import { Link } from "react-router-dom";
+import Loader from "../../Loader/Loader";
+import ModalAlert from "../../ModalAlert/ModalAlert";
+import ModalField from "./ModalField";
+import ModalReport from "./ModalReport";
+import PenModal from "../PenModal/PenModal";
+import { ToastContainer } from "react-toastify";
+import axios from "axios";
+import messageToast from "../../../utils/messageToast";
+
+const CreateField = () => {
   const [fields, setFields] = useState([]);
+  const [edit, setEdit] = useState(false);
+  const [pensUpdated, setPensUpdated] = useState(false);
+  const [penVariablesValues, setPenVariablesValues] = useState({});
+  const [pen, setPen] = useState([]);
+  const [openModalAlert, setOpenModalAlert] = useState(false);
+  const [openFieldModal, setOpenFieldModal] = useState(false);
+  const [openPenModal, setOpenPenModal] = useState(false);
+  const [fieldName, setFieldName] = useState("");
+  const [fieldId, setFieldId] = useState("");
+  const [loader, setLoader] = useState(true);
   const addField = (field) => {
     setFields([...fields, field]);
   };
+
   useEffect(() => {
-    if (!fields.length) {
-      axios
-        .get(`${import.meta.env.VITE_API_BASE_URL}/field`)
-        .then((response) => {
-          setFields(response.data ? response.data : []);
-        });
-    }
-  }, [fields.length]);
+    axios
+      .get(`${import.meta.env.VITE_API_BASE_URL}/field`)
+      .then((response) => {
+        setFields(response.data ? response.data : []);
+        setLoader(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setLoader(false);
+      });
+    setPensUpdated(false);
+  }, [fields?.length, pensUpdated]);
+  console.log("CAMPOS", fields);
+  if (loader) return <Loader />;
   return (
     <div>
+      <ToastContainer />
       <Box
         as="span"
         flex="1"
         textAlign="left"
-        justifyContent={'space-between'}
-        display={'flex'}
+        justifyContent={"space-between"}
+        display={"flex"}
         paddingX={2}
-        paddingY={8}
+        paddingTop={6}
+        paddingBottom={6}
+        alignItems={"center"}
       >
-        <h1>Jhon Doe</h1>
-        <ModalField addField={addField} messageToast={messageToast} />
+        <Text as="h2" color={"#fff"}>
+          Jhon Doe
+        </Text>
+        <Box>
+          <ModalField
+            setFields={setFields}
+            fieldName={fieldName}
+            fieldId={fieldId}
+            setFieldName={setFieldName}
+            editOpen={openFieldModal}
+            edit={edit}
+            setEdit={setEdit}
+            addField={addField}
+            messageToast={messageToast}
+          />
+          <PenModal
+            messageToast={messageToast}
+            pen={pen}
+            setPensUpdated={setPensUpdated}
+            penVariablesValues={penVariablesValues}
+            setPenVariablesValues={setPenVariablesValues}
+            setPen={setPen}
+            open={openPenModal}
+            setOpen={setOpenPenModal}
+          />
+          <ModalAlert
+            open={openModalAlert}
+            setOpen={setOpenModalAlert}
+            fieldId={fieldId}
+            setFields={setFields}
+            fields={fields}
+          />
+        </Box>
       </Box>
-      <Accordion allowToggle>
+      <Accordion borderTopWidth={0} borderBottomWidth={0} allowToggle>
         {fields.map((field, index) => (
-          <AccordionItem key={index}>
-            <Box display={'flex'} flexDirection={'column'}>
-              <AccordionButton>
-                <Box flex="1" textAlign="left">
-                  <Text as="b" marginRight={4}>
-                    {field.name}
-                  </Text>
-                  <button className="badge bg-info m-1">
-                    <EditIcon boxSize={3} />
-                  </button>
-                  <button className="badge bg-danger m-1">
-                    <DeleteIcon
-                      boxSize={3}
-                      onClick={async (event) => {
-                        event.stopPropagation();
-                        await axios.delete(
-                          `${import.meta.env.VITE_API_BASE_URL}/field/${
-                            field.id
-                          }`
-                        );
-                        const updatedFields = fields.filter(
-                          (f) => f.id !== field.id
-                        );
-                        setFields(updatedFields);
-                        alert('Campo eliminado');
-                      }}
-                    />
-                  </button>
-                </Box>
-                <Box marginRight={4}>
-                  <Link
-                    to={`/newPen/${field.name}/${field.id}`}
-                    className="btn btn-primary btn-sm mr-2 align-content-center"
+          <>
+            <Text
+              paddingY={1}
+              as="mark"
+              background="#2F855A"
+              color="white"
+              fontWeight={500}
+            >
+              Campo
+            </Text>
+            <AccordionItem
+              key={index}
+              paddingTop={2}
+              paddingBottom={3}
+              borderTopWidth={2}
+              borderBlockEnd={0}
+              borderTopColor="#2F855A"
+              width={"100%"}
+              alignItems={"center"}
+            >
+              <Box display={"flex"} flexDirection={["column"]}>
+                <AccordionButton p={0} display={"grid"}>
+                  <Grid
+                    templateAreas={[
+                      `"text-icon accordion-icon"
+                  "button-group button-group"
+                  "corral corral"`,
+                      `"text-icon accordion-icon"
+                  "button-group button-group"
+                  "corral corral"`,
+                      `"text-icon  button-group accordion-icon"
+                      "corral corral corral"`,
+                      `"text-icon  button-group accordion-icon"
+                      "corral corral corral"`,
+                    ]}
+                    gridTemplateRows={[
+                      "30px 1fr auto",
+                      "30px 1fr auto",
+                      "50px auto",
+                      "50px auto",
+                    ]}
+                    gridTemplateColumns={[
+                      "90% 10%",
+                      "70% 30%",
+                      "1fr auto",
+                      "auto 240px 40px",
+                    ]}
+                    alignItems={"center"}
+                    justifyItems={"center"}
+                    pb={0}
                   >
-                    Crear Corral
-                  </Link>
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-              <Wrap marginX={3}>
-                {field?.pens.map((e, i) => (
-                  <WrapItem key={i}>
-                    <Tooltip label="Corral">
-                      <Tag>{e.name}</Tag>
-                    </Tooltip>
-                  </WrapItem>
-                ))}
-              </Wrap>
-            </Box>
-            <AccordionPanel pb={4}>
-              <Accordion>
-                {field?.pens.map((pen, i) => (
-                  <AccordionItem key={i}>
-                    <Box display={'flex'} flexDirection={'column'}>
-                      <AccordionButton>
-                        <Box flex="1" textAlign="left">
-                          <Box display={'flex'} gap={1}>
-                            <Text as="b" marginRight={4}>
-                              {pen.name}
-                            </Text>
-                            <button className="badge bg-info m-1">
-                              <EditIcon boxSize={3} />
-                            </button>
-                            <button className="badge bg-danger m-1">
-                              <DeleteIcon boxSize={3} />
-                            </button>
-                          </Box>
-                        </Box>
-                        <Box marginRight={5}>
-                          <Link
-                            to={`/measurement/${pen.id}`}
-                            className="btn btn-primary btn-sm align-content-center"
+                    <GridItem justifySelf={["left"]} pr="0" area={"text-icon"}>
+                      <Box display={"flex"} gap={[2]}>
+                        <Text as="b" marginRight={0} color={"#fff"}>
+                          {field.name}
+                        </Text>
+                        <ButtonGroup pl={[0, 2]} alignItems={"center"}>
+                          <button
+                            className="badge bg-info m-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEdit(true);
+                              setFieldName(field.name);
+                              setFieldId(field.id);
+                              setOpenFieldModal(true);
+                            }}
                           >
-                            Generar Medición
+                            <EditIcon boxSize={3} />
+                          </button>
+                          <button className="badge bg-danger m-1">
+                            <DeleteIcon
+                              boxSize={3}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setOpenModalAlert(true);
+                                setFieldId(field.id);
+                              }}
+                            />
+                          </button>
+                          <Link
+                            to={`/reports/${field.id}`}
+                            style={{ marginLeft: "0.1rem" }}
+                          >
+                            <Icon
+                              cursor={"pointer"}
+                              as={FcDocument}
+                              w={6}
+                              h={6}
+                            />
                           </Link>
-                        </Box>
-                      </AccordionButton>
-                      <Wrap marginX={3}>
-                        {pen.pen_variable.map((e, i) => (
-                          <WrapItem key={i}>
-                            <Tooltip label="Variable">
-                              <Tag key={i}>{e.variable.name}</Tag>
+                          {/* </Button> */}
+                        </ButtonGroup>
+                      </Box>
+                    </GridItem>
+                    <GridItem area={"accordion-icon"} justifySelf={["right"]}>
+                      <AccordionIcon color={"#fff"} />
+                    </GridItem>
+                    <GridItem
+                      justifySelf={["left"]}
+                      pt={[3, 3, 1, 1]}
+                      area={"corral"}
+                    >
+                      <Wrap>
+                        {field?.pens.map((e) => (
+                          <WrapItem key={`tool-${index}`}>
+                            <Tooltip label="Corral">
+                              <Tag
+                                backgroundColor={"#1F9ACF"}
+                                color={"#fff"}
+                                size={"sm"}
+                                fontSize={"11px"}
+                              >
+                                {e.name}
+                              </Tag>
                             </Tooltip>
                           </WrapItem>
                         ))}
                       </Wrap>
-                    </Box>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </AccordionPanel>
-          </AccordionItem>
+                    </GridItem>
+                    <GridItem
+                      paddingTop={[2, 2, 0, 0]}
+                      paddingBottom={[2, 0]}
+                      paddingRight={[0, 0, 4, 0]}
+                      area={"button-group"}
+                      justifySelf={["left", "left", "left", "auto"]}
+                      width={"100%"}
+                    >
+                      <ButtonGroup
+                        display={"flex"}
+                        justifyContent={[
+                          "space-between",
+                          "space-between",
+                          "center",
+                          "center",
+                        ]}
+                      >
+                        <ModalReport
+                          messageToast={messageToast}
+                          pens={field.pens}
+                          field_id={field.id}
+                        />
+                        <Button
+                          as={Link}
+                          to={`/newPen/${field.name}/${field.id}`}
+                          bg="#edeef1"
+                          color="#1a1a1a"
+                          size="xs"
+                          py={4}
+                          px={[2, 3]}
+                          fontSize={["8.4px", "10px"]}
+                          textTransform="uppercase"
+                          _hover={{ bg: "white", color: "#1a1a1a" }}
+                        >
+                          Crear Corral
+                        </Button>
+                      </ButtonGroup>
+                    </GridItem>
+                  </Grid>
+                </AccordionButton>
+                <AccordionPanel paddingBottom={5}>
+                  {field?.pens?.length ? (
+                    <Text
+                      as="mark"
+                      background="#2B6CB0"
+                      color="white"
+                      fontWeight={500}
+                    >
+                      Corrales
+                    </Text>
+                  ) : null}
+
+                  {field?.pens?.map((pen) => (
+                    <AccordionItem
+                      borderBottom={0}
+                      paddingTop={2}
+                      paddingBottom={1}
+                      borderTopColor="#2B6CB0"
+                      key={`accor-${index}`}
+                    >
+                      <Box display={"flex"} flexDirection={"column"}>
+                        <AccordionButton>
+                          <Box flex="1" textAlign="left">
+                            <Box display={"flex"} gap={1}>
+                              <Text
+                                as="b"
+                                color={"#fff"}
+                                marginRight={[2, 4, 4, 4]}
+                              >
+                                {pen.name}
+                              </Text>
+                              <button className="badge bg-info m-1">
+                                <EditIcon
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenPenModal(true);
+                                    setPen(pen);
+                                    let penvariables = {};
+                                    pen?.pen_variable?.map((p) => {
+                                      penvariables[
+                                        p.variable.name +
+                                          "-" +
+                                          p.variable.type_of_object.name
+                                      ] = p.id;
+                                    });
+                                    setPenVariablesValues(penvariables);
+                                  }}
+                                  boxSize={3}
+                                />
+                              </button>
+                              <button className="badge bg-danger m-1">
+                                <DeleteIcon boxSize={3} />
+                              </button>
+                            </Box>
+                          </Box>
+                        </AccordionButton>
+                        <Wrap marginX={3}>
+                          {pen.pen_variable.map((e) => (
+                            <WrapItem key={`toolTag-${index}`}>
+                              <Tooltip
+                                label={JSON.stringify(e.custom_parameters)}
+                              >
+                                <Tag
+                                  backgroundColor={"#1F9ACF"}
+                                  color={"#fff"}
+                                  size={"sm"}
+                                  fontSize={"11px"}
+                                >
+                                  {e.variable.name} -{" "}
+                                  {e.variable.type_of_object.name}
+                                </Tag>
+                              </Tooltip>
+                            </WrapItem>
+                          ))}
+                        </Wrap>
+                      </Box>
+                    </AccordionItem>
+                  ))}
+                </AccordionPanel>
+              </Box>
+            </AccordionItem>
+          </>
         ))}
       </Accordion>
     </div>

@@ -1,25 +1,27 @@
-import { useState } from "react";
 import {
+  Button,
   FormControl,
   FormLabel,
+  HStack,
   Input,
-  Tooltip,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
-  useDisclosure,
-  Text,
-  Button,
-  RadioGroup,
-  HStack,
-  Wrap,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Radio,
+  RadioGroup,
+  Text,
+  Tooltip,
+  Wrap,
+  useDisclosure,
 } from "@chakra-ui/react";
+
 import { EditIcon } from "@chakra-ui/icons";
+import { useState } from "react";
+
 export default function EditAttribute({
   messageToast,
   attribute,
@@ -30,7 +32,6 @@ export default function EditAttribute({
   const [enumInput, setEnumInput] = useState([]);
 
   const onChange = (e, type, selectValue) => {
-    // if (!e.target.name == 'granularity') {
     if (type === "number") {
       setEditAtributte({
         ...editAttribute,
@@ -61,23 +62,14 @@ export default function EditAttribute({
       });
     }
 
-    if (type === "bolean"){
+    if (type === "boolean") {
       setEditAtributte({
         ...editAttribute,
         default_parameters: {
-          value: selectValue
+          value: selectValue,
         },
       });
     }
-    // }
-
-    // setEditAtributte({
-    //   ...editAttribute,
-    //   default_parameters: {
-    // ...editAttribute.default_parameters,
-    // [e.target.name]: e.target.value && parseInt(e.target.value),
-    //   },
-    // });
   };
 
   const addEnumItem = (enumInput) => {
@@ -97,15 +89,20 @@ export default function EditAttribute({
 
   return (
     <>
-      <button
-        className="badge bg-info m-1"
+      <EditIcon
+        cursor={"pointer"}
+        backgroundColor={"#1f9bcf"}
+        fontSize={30}
+        paddingX={"0.2rem"}
+        paddingY={"0.12rem"}
+        margin={1}
+        maxWidth={"26px"}
+        height={"18px"}
         onClick={() => {
           setEditAtributte(attribute);
           onOpen();
         }}
-      >
-        <EditIcon boxSize={4} />
-      </button>
+      />
       <Modal isCentered isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
@@ -164,7 +161,6 @@ export default function EditAttribute({
                 <FormControl>
                   <FormLabel>Granularity</FormLabel>
                   <Input
-                    // type="text"
                     onChange={(e) => onChange(e, attribute.type)}
                     value={editAttribute?.default_parameters?.granularity}
                     name="granularity"
@@ -174,12 +170,12 @@ export default function EditAttribute({
                 </FormControl>
               </>
             )}
-            {editAttribute.type === "bolean" && (
+            {editAttribute.type === "boolean" && (
               <>
                 <RadioGroup
                   defaultValue="true"
                   value={editAttribute.default_parameters.value}
-                  onChange={(e)=> onChange(e,editAttribute.type,e)}
+                  onChange={(e) => onChange(e, editAttribute.type, e)}
                 >
                   <HStack spacing="1rem">
                     <Wrap>
@@ -192,7 +188,6 @@ export default function EditAttribute({
             )}
             {editAttribute.type === "enum" && (
               <div>
-                {console.log("ATRIBUTO:", attribute)}
                 <Wrap>
                   {editAttribute.default_parameters.value.map((value, i) => (
                     <div key={i}>
@@ -224,7 +219,6 @@ export default function EditAttribute({
                 >
                   <Input
                     onChange={(e) => setEnumInput(e.target.value)}
-                    // onKeyDown={handleEnumItemInput}
                     width={"70%"}
                     m={2}
                     value={enumInput}
@@ -241,7 +235,6 @@ export default function EditAttribute({
                 </FormControl>
               </div>
             )}
-            {/* <Lorem count={2} /> */}
           </ModalBody>
 
           <ModalFooter>
@@ -251,7 +244,6 @@ export default function EditAttribute({
             <Button colorScheme="blue" mr={3} onClick={onClose}>
               Close
             </Button>
-            {/* <Button variant="ghost">Secondary Action</Button> */}
           </ModalFooter>
         </ModalContent>
       </Modal>
