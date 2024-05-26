@@ -19,6 +19,13 @@ main_bp = Blueprint('main', __name__)
 # Principal
 
 
+@main_bp.route("/danger-drop-db")
+def drop_db():
+    """Drop all tables in the database."""
+    db.drop_all()
+    db.create_all()
+
+
 @main_bp.route('/')
 def index():
     return render_template('index.html')
