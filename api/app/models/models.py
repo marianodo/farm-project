@@ -50,7 +50,7 @@ class Variable(db.Model, SerializerMixin):
     name = db.Column(db.String(50), nullable=False, unique=False, index=True,
                      sqlite_on_conflict_unique='FAIL')  # 'higiene', 'Peso', 'Nivel De Ruido'
     # 'numérico', 'booleano', 'enum'
-    type = db.Column(Enum('number', 'boolean', 'enum'), nullable=False)
+    type = db.Column(Enum('number', 'boolean', 'enum', name="variable_type"), nullable=False)
     type_of_object_id = db.Column(db.Integer, db.ForeignKey(
         'type_of_object.id'), nullable=False)
     default_parameters = db.Column(db.JSON, nullable=False, default={

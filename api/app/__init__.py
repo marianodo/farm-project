@@ -16,7 +16,7 @@ app.config.from_object(configuration)
 
 with app.app_context():
     db.init_app(app)
-    #db.drop_all()
+    # db.drop_all()
     db.create_all()
     register_blueprints(app)
 
